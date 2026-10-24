@@ -9,7 +9,7 @@ The post has not been published and a live Microsoft Form has not been created. 
 
 ## Add the banner
 
-Open the banner on GitHub and use **Download raw file** to save the PNG. On your LinkedIn company page, open its admin view, edit the cover image and upload it. The supplied artwork is a wide 2167 × 725 master. Use LinkedIn's crop preview to centre the band containing the brand name, tagline and beta message, keeping the logo on the right visible. Essential content sits in the middle band for the shallower company-page cover; the left side is intentionally decorative to allow for the page-avatar overlap. Check the mobile preview before saving. LinkedIn can change its cover sizing and cropping interface.
+Open the banner on GitHub and use **Download raw file** to save the PNG. On your LinkedIn company page, open its admin view, edit the cover image and upload it. The supplied artwork is a wide 2158 × 729 master. Use LinkedIn's crop preview to centre the band containing the logo, brand name and tagline. Essential content sits in the middle band for the shallower company-page cover; the left side is intentionally clear to allow for the page-avatar overlap. Check the mobile preview before saving. LinkedIn can change its cover sizing and cropping interface.
 
 ## Feedback contact
 
