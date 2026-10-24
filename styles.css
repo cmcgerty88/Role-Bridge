@@ -45,3 +45,4 @@
 @media(max-width:640px){.journey-nav{grid-template-columns:repeat(2,minmax(0,1fr));padding:6px;gap:4px}.journey-nav button{padding:9px;font-size:.8rem;gap:6px}.upcoming-item{align-items:flex-start;flex-direction:column}.workspace-navigation{flex-wrap:wrap}}
 .hero #interview-shortcut{display:block;margin-top:16px;font-size:13px}.hero #open-workspace{display:block;margin-top:8px}.plan>summary{color:#fff}
 .application-cv-import{margin-bottom:24px}.application-cv-import input[type=file]{max-width:100%}#application-cv-fields>div{padding:16px 0;border-top:1px solid var(--line)}#application-cv-fields label:not(.check){font-size:13px}
+.beta-notice{display:flex;align-items:flex-start;gap:12px;margin:20px 0 0;padding:12px 14px;background:var(--pale);border-left:3px solid var(--green);border-radius:6px;font-size:14px}.beta-notice strong{color:var(--green);flex-shrink:0}.beta-notice span{min-width:0}
