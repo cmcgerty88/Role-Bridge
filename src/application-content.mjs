@@ -1,3 +1,4 @@
+import { companyResearchBlocks } from './company-research.mjs';
 import { sampleAnswer } from './interview-answers.mjs';
 import { normalise, hasPhrase, findSkillMentions } from './model.mjs';
 import { cleanPack } from './application-data.mjs';
@@ -69,7 +70,7 @@ export function interviewBlocks(job, pack) {
     block('Your 20-minute preparation plan', 'heading'), block('5 minutes: read the three advert priorities and choose your strongest examples. 10 minutes: practise your introduction and two answers aloud. 5 minutes: choose questions to ask and check the interview arrangements.'),
     block('How to use the sample answers', 'heading'), block('Examples below show structure and reasoning. Fictional examples are not your career history. Answer starters contain brackets for facts only you can supply. Keep your own notes separate and use only claims you can support.'),
     block('How to practise', 'heading'), block('Use Situation, Task, Action and Result (STAR). Keep most of the answer on what you personally did. State only results you can support. If experience is missing, explain the gap and how you would learn.'),
-    { ...block('1. Know the role and your evidence', 'heading'), pageBreak: true }, ...preparationEvidenceBlocks(pack), ...contextBlocks(pack), { ...block('2. Practise your answers', 'heading'), pageBreak: true }];
+    { ...block('1. Know the role and your evidence', 'heading'), pageBreak: true }, ...preparationEvidenceBlocks(pack), ...contextBlocks(pack), ...companyResearchBlocks(pack), { ...block('2. Practise your answers', 'heading'), pageBreak: true }];
   interviewQuestions(job, pack).forEach((q, index) => {
     const sample = sampleAnswer(q, job, pack);
     result.push(block(`${index + 1}. ${q.question}`, 'heading'), block('What to cover: ' + q.guidance), block(sample.label, 'subtitle'), block(sample.text), block(sample.adapt));

@@ -12,6 +12,8 @@ async function prepare(page) {
   await page.locator('#prep-find-focus').click(); await page.locator('#prep-context-status').selectOption('provided');
   await page.locator('#prep-company').fill('Screening call: the team wants clearer release ownership.');
   await page.locator('#prep-process').fill('A 45-minute panel with the delivery lead.');
+  await page.locator('#prep-company-url').fill('https://example.com/about');
+  await page.locator('#prep-company-research').fill('Creates scheduling tools for clinics. The website describes reliable service as a priority.');
   await page.locator('#prep-reviewed').check(); await page.locator('#prep-create').click();
   await expect(page.locator('#prep-result')).toBeVisible();
 }
@@ -40,6 +42,9 @@ test('PDF and Word contain the same plan, samples, evidence, context and user no
   expect(compact(pdfs[0].map(p => p.text).join(' '))).toBe(compact(wordText));
   expect(pdfs[0].every(p => p.bounded)).toBeTruthy(); expect(pdfs[1]).toHaveLength(2); expect(pdfs[1].every(p => p.bounded && p.readable)).toBeTruthy();
   expect(pdfs[1][0].text).toContain('Pre-interview checklist'); expect(pdfs[1][1].text).toContain('Interview-day cheat sheet');
+  for (const phrase of ['https://example.com/about', 'Creates scheduling tools for clinics.', 'Know the company', 'What do you know about Example employer', 'has not visited this website']) expect(wordText).toContain(phrase);
+  expect(pdfs[1][0].text).toContain('example.com');
+  expect(pdfs[1][1].text).toContain('example.com');
   expect(wordText).toContain('go/no-go'); expect(wordText).toContain('Fictional worked example'); expect(wordText).toContain('My personal rehearsal note');
   await writeFile('/tmp/rolebridge-interview-full.pdf', full); await writeFile('/tmp/rolebridge-interview-cheats.pdf', cheats);
 });
@@ -50,5 +55,6 @@ test('CV builder is absent; users can reopen and delete an interview pack withou
   await page.getByText('Manage this saved preparation', { exact: true }).click(); page.once('dialog', d => d.accept()); await page.locator('#prep-delete').click();
   await expect(page.locator('#prep-form')).toBeVisible(); await expect(page.locator('#prep-result')).toBeHidden();
   await expect(page.locator('#prep-evidence')).toHaveValue(''); await expect(page.locator('#prep-company')).toHaveValue('');
+  await expect(page.locator('#prep-company-url')).toHaveValue(''); await expect(page.locator('#prep-company-research')).toHaveValue('');
   await page.locator('#plan-home').click(); await expect(page.locator('#application-list > article')).toHaveCount(1);
 });

@@ -106,7 +106,7 @@ test('each cheat sheet handles maximum-width content without shrinking text or l
   const bytes = await page.evaluate(async () => {
     const { preInterviewSheetBlocks, interviewDaySheetBlocks } = await import('/src/interview-prep-content.mjs'); const { makeCheatSheetsPdf } = await import('/src/document-export.mjs');
     const { cleanPack } = await import('/src/application-data.mjs');
-    const pack = cleanPack({ prep: { role: 'W'.repeat(160), skills: 'W'.repeat(2000), evidence: Array(3).fill('W'.repeat(1300)).join('\n') }, focus: Array(3).fill('W'.repeat(280)).join('\n'), roleId: 'release-manager', interviewContext: { status: 'provided', company: 'W'.repeat(2000), process: 'W'.repeat(2000) }, answers: [{ id: 'introduction', answer: 'W'.repeat(1000) }] });
+    const pack = cleanPack({ prep: { role: 'W'.repeat(160), skills: 'W'.repeat(2000), evidence: Array(3).fill('W'.repeat(1300)).join('\n') }, companyResearch: { url: 'https://example.com/' + 'W'.repeat(900), notes: 'W'.repeat(4000) }, focus: Array(3).fill('W'.repeat(280)).join('\n'), roleId: 'release-manager', interviewContext: { status: 'provided', company: 'W'.repeat(2000), process: 'W'.repeat(2000) }, answers: [{ id: 'introduction', answer: 'W'.repeat(1000) }] });
     const job = { title: 'W'.repeat(180), employer: 'W'.repeat(180) }; return [...await makeCheatSheetsPdf([preInterviewSheetBlocks(job, pack), interviewDaySheetBlocks(job, pack)])];
   });
   const { pages } = await pdfInfo(page, Buffer.from(bytes)); expect(pages).toHaveLength(2); expect(pages[0].bounded).toBeTruthy(); expect(pages[0].readable).toBeTruthy();
@@ -161,4 +161,47 @@ test('third input is required, reviewed context reaches both PDFs and is isolate
   expect((await saved(page)).packs[0].interviewContext.company).toBe('');
   expect((await saved(page)).packs[0].answers).toEqual([{ id: 'introduction', answer: 'Introduction notes to keep.' }]);
   const none = await download(page, 'prep-download-text'); expect(none.bytes.toString()).toContain('no extra information yet'); expect(none.bytes.toString()).not.toContain(company);
+});
+
+test('company website research requires review, survives encrypted restore and stays with its vacancy without any fetch', async ({ page }) => {
+  const requests = []; page.on('request', r => requests.push(r));
+  await begin(page, true); await source(page);
+  await page.locator('#prep-context-status').selectOption('none');
+  for (const url of ['javascript:alert(1)', 'https://example.com/?token=private', 'https://user:password@example.com']) {
+    await page.locator('#prep-company-url').fill(url); await page.locator('#prep-reviewed').check(); await page.locator('#prep-create').click();
+    await expect(page.locator('#prep-result')).toBeHidden(); await expect(page.locator('#prep-company-link')).toBeHidden();
+    await expect(page.locator('#prep-company-url')).toBeFocused();
+  }
+  const url = 'https://example.com/about', notes = 'Builds appointment tools for clinics. Public priority: reliable services.';
+  await page.locator('#prep-company-url').fill(url);
+  await expect(page.locator('#prep-company-link')).toHaveAttribute('href', url);
+  await expect(page.locator('#prep-company-link')).toHaveAttribute('rel', 'noopener noreferrer');
+  await page.locator('#prep-reviewed').check(); await page.locator('#prep-company-research').fill(notes);
+  await expect(page.locator('#prep-reviewed')).not.toBeChecked();
+  expect(JSON.stringify(await saved(page))).not.toContain(notes); expect(JSON.stringify(await saved(page))).not.toContain(url);
+  await create(page);
+  await expect.poll(async () => (await saved(page)).packs[0]?.companyResearch).toEqual({ url, notes });
+  const text = (await download(page, 'prep-download-text')).bytes.toString();
+  expect(text).toContain(url); expect(text).toContain(notes);
+  await page.locator('#prep-notes').click();
+  await page.locator('#prep-answer-company-knowledge').locator('..').locator('summary').click();
+  await page.locator('#prep-answer-company-knowledge').fill('My company research practice answer.');
+  await page.locator('#prep-answer-introduction').locator('..').locator('summary').click();
+  await page.locator('#prep-answer-introduction').fill('Introduction note to preserve.');
+  await expect.poll(async () => (await saved(page)).packs[0].answers.length).toBe(2);
+  await page.reload(); await page.locator('#password').fill(password); await page.locator('#create-workspace').click(); await tool(page, 10);
+  await expect(page.locator('#prep-company-url')).toHaveValue(url); await expect(page.locator('#prep-company-research')).toHaveValue(notes);
+  const originalId = (await saved(page)).jobs[0].id;
+  await page.locator('#prep-job').selectOption('');
+  await expect(page.locator('#prep-company-url')).toHaveValue(''); await expect(page.locator('#prep-company-research')).toHaveValue('');
+  await expect(page.locator('#prep-company-link')).toBeHidden();
+  await page.locator('#prep-job').selectOption(originalId);
+  await expect(page.locator('#prep-company-research')).toHaveValue(notes);
+  await page.locator('#prep-company-url').fill(''); await page.locator('#prep-company-research').fill('');
+  await page.locator('#prep-reviewed').check(); page.once('dialog', d => d.dismiss()); await page.locator('#prep-create').click();
+  expect((await saved(page)).packs[0].companyResearch.notes).toBe(notes);
+  page.once('dialog', d => d.accept()); await create(page);
+  await expect.poll(async () => (await saved(page)).packs[0].companyResearch.notes).toBe('');
+  expect((await saved(page)).packs[0].answers).toEqual([{ id: 'introduction', answer: 'Introduction note to preserve.' }]);
+  expect(requests.every(r => r.url().startsWith('http://127.0.0.1:8771/') && r.method() === 'GET' && !r.postData())).toBeTruthy();
 });

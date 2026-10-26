@@ -1,3 +1,4 @@
+import { cleanCompanyResearch, safeCompanyUrl, hasCompanyResearch } from './company-research.mjs';
 import { interviewQuestions } from './interviews.mjs';
 import { sampleAnswer } from './interview-answers.mjs';
 import { readCv } from './cv.mjs';
@@ -14,12 +15,20 @@ const node = (tag, text) => { const el = document.createElement(tag); el.textCon
 export function initInterviewPrep({ getState, changed, announce }) {
   let initialized = false, resultId = '', revision = 0, fileRevision = 0;
   const form = $('prep-form'); form.reset();
-  const fields = ['prep-role', 'prep-skills', 'prep-evidence', 'prep-job-title', 'prep-employer', 'prep-description', 'prep-focus', 'prep-company', 'prep-process'];
+  const fields = ['prep-role', 'prep-skills', 'prep-evidence', 'prep-job-title', 'prep-employer', 'prep-description', 'prep-focus', 'prep-company', 'prep-process', 'prep-company-url', 'prep-company-research'];
   function invalidate() {
     revision++; $('prep-practice').hidden = true; $('prep-questions').replaceChildren(); $('prep-reviewed').checked = false; $('prep-result').hidden = true;
     $('prep-preview').replaceChildren(); $('prep-error').textContent = ''; $('prep-export-status').textContent = '';
   }
   fields.forEach(id => $(id).addEventListener('input', invalidate));
+  const researchFromForm = () => cleanCompanyResearch({ url: $('prep-company-url').value.trim(), notes: $('prep-company-research').value });
+  function updateCompanyLink() {
+    const input = $('prep-company-url'), url = safeCompanyUrl(input.value.trim()), link = $('prep-company-link');
+    input.setCustomValidity(input.value.trim() && !url ? 'Use a public HTTPS website address without login details, tracking parameters, a port or a # fragment.' : '');
+    link.hidden = !url;
+    if (url) link.href = url; else link.removeAttribute('href');
+  }
+  $('prep-company-url').addEventListener('input', updateCompanyLink);
   const contextFromForm = () => cleanInterviewContext({ status: $('prep-context-status').value, company: $('prep-company').value.trim(), process: $('prep-process').value.trim() });
   function showContextFields() { $('prep-context-fields').hidden = $('prep-context-status').value !== 'provided'; }
   $('prep-context-status').addEventListener('change', () => { invalidate(); showContextFields(); });
@@ -49,6 +58,8 @@ export function initInterviewPrep({ getState, changed, announce }) {
     const context = cleanInterviewContext(pack?.interviewContext);
     $('prep-context-status').value = context.status === 'unknown' ? '' : context.status;
     $('prep-company').value = context.company; $('prep-process').value = context.process; showContextFields();
+    const research = cleanCompanyResearch(pack?.companyResearch);
+    $('prep-company-url').value = research.url; $('prep-company-research').value = research.notes; updateCompanyLink();
     $('prep-focus').value = pack?.focus || (job ? suggestedRequirements(job.description) : '');
     $('prep-job-status').textContent = job?.source?.summaryOnly
       ? 'This is a short Reed summary. Check the full advert. Paste the full description below before creating your pack.'
@@ -114,7 +125,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
   form.addEventListener('submit', async event => {
     event.preventDefault(); $('prep-error').textContent = '';
     if (!form.reportValidity()) return;
-    const interviewContext = contextFromForm();
+    const interviewContext = contextFromForm(), companyResearch = researchFromForm();
     if (interviewContext.status === 'unknown') { $('prep-error').textContent = 'Add company or interview-process notes, or choose “I don’t have any extra information yet”.'; $('prep-company').focus(); return; }
     if (!$('prep-role').value.trim() || $('prep-evidence').value.trim().length < 20 || !$('prep-job-title').value.trim() || $('prep-description').value.trim().length < 20) { $('prep-error').textContent = 'Add your role, a work example, the interview role and a job description before continuing.'; return; }
     const focus = $('prep-focus').value.trim(), priorities = focus.split('\n').filter(s => s.trim());
@@ -126,16 +137,16 @@ export function initInterviewPrep({ getState, changed, announce }) {
     if (!existing && state.packs.length >= 5) { $('prep-error').textContent = 'Five packs are already saved. Open an older saved preparation and use Manage this saved preparation to delete it before creating another.'; return; }
     const roleId = suggestedRole(job), questionsChanged = existing && (existing.focus !== focus || existing.roleId !== roleId);
     if (questionsChanged && existing.answers.some(a => a.answer.trim()) && !confirm('Changing the interview focus replaces the questions and clears their practice notes. Continue? Other saved information will be kept.')) return;
-    const removedContextNotes = existing?.answers.some(a => a.answer.trim() && ((a.id === 'context-company' && !interviewContext.company) || (a.id === 'context-process' && !interviewContext.process)));
-    if (!questionsChanged && removedContextNotes && !confirm('Removing these company or process notes also removes practice answers for those context questions. Other answers will be kept. Continue?')) return;
+    const removedContextNotes = existing?.answers.some(a => a.answer.trim() && ((a.id === 'context-company' && !interviewContext.company) || (a.id === 'context-process' && !interviewContext.process) || (a.id === 'company-knowledge' && !hasCompanyResearch({ companyResearch }))));
+    if (!questionsChanged && removedContextNotes && !confirm('Removing these company sources or process notes also removes practice answers for those questions. Other answers will be kept. Continue?')) return;
     const profile = { currentRole: $('prep-role').value.trim(), skills: $('prep-skills').value.trim(), evidence: $('prep-evidence').value.trim() };
     const token = revision; $('prep-create').disabled = true;
     try {
       const candidate = existing || cleanPack({ jobId: job.id });
       if (token !== revision || !$('prep-reviewed').checked) { $('prep-error').textContent = 'Inputs changed while preparing the pack. Review them and create it again.'; return; }
-      const pack = cleanPack({ ...candidate, roleId, focus, interviewContext, prep: { role: profile.currentRole, skills: profile.skills, evidence: profile.evidence }, answers: questionsChanged ? [] : candidate.answers });
+      const pack = cleanPack({ ...candidate, roleId, focus, interviewContext, companyResearch, prep: { role: profile.currentRole, skills: profile.skills, evidence: profile.evidence }, answers: questionsChanged ? [] : candidate.answers });
       // A removed context prompt must not keep notes that can no longer be edited.
-      pack.answers = pack.answers.filter(a => a.id !== 'context-company' || interviewContext.company.trim()).filter(a => a.id !== 'context-process' || interviewContext.process.trim());
+      pack.answers = pack.answers.filter(a => a.id !== 'context-company' || interviewContext.company.trim()).filter(a => a.id !== 'context-process' || interviewContext.process.trim()).filter(a => a.id !== 'company-knowledge' || hasCompanyResearch(pack));
       if (!existingJob) state.jobs.push(job); else state.jobs[state.jobs.indexOf(existingJob)] = job;
       if (existing) state.packs[state.packs.indexOf(existing)] = pack; else state.packs.push(pack);
       changed(); showResult(job, pack);
@@ -153,7 +164,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
   });
   $('prep-delete').addEventListener('click', () => {
     const state = getState(), pack = state.packs.find(p => p.jobId === resultId);
-    if (!pack || !confirm('Delete the interview evidence, company notes and practice answers for this job?' + (pack.sourceKey ? ' This also deletes the older CV draft stored with this job; keep an encrypted backup if needed.' : '') + ' Downloaded documents must be deleted separately.')) return;
+    if (!pack || !confirm('Delete the interview evidence, company website research, notes and practice answers for this job?' + (pack.sourceKey ? ' This also deletes the older CV draft stored with this job; keep an encrypted backup if needed.' : '') + ' Downloaded documents must be deleted separately.')) return;
     state.packs = state.packs.filter(p => p !== pack);
     changed(); resultId = ''; invalidate(); form.hidden = false; chooseJob(true); fillEvidence({});
     $('prep-upload-status').textContent = 'Preparation deleted. Upload a CV, reuse your profile or enter examples to start again.';

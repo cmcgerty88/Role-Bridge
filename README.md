@@ -138,3 +138,12 @@ The paused CV builder source is not imported by the live app. Its UI browser sce
 ## Website feedback
 
 The separate [feedback page](feedback/index.html) presents seven beta-feedback questions. Homepage and footer links open the form in a new tab. The owner-supplied Formspree endpoint in `src/feedback-config.mjs` enables sending after publication; inbox delivery still needs verification. Clearing that endpoint disables sending and shows a preview notice while keeping questions editable. Set the recipient privately in the provider account; never put it in client code. See [setup and delivery checks](docs/FEEDBACK-SETUP.md). The feedback page imports no workspace modules, does not read/write browser storage, and sends only the reviewed survey answers after an explicit consent checkbox and submit action. Email delivery has not been verified merely by passing browser tests.
+
+
+## Company research in interview packs
+
+Step 3 → “2. The full job description” now accepts an optional company website URL and up to 4,000 characters of pasted company information. This is a manual research feature: no website fetching, proxy, AI call or external summarisation is performed. The source opens only when the user selects the explicit new-tab link, with no referrer or workspace data attached. URLs must be public HTTPS links without credentials, query strings, fragments or custom ports.
+
+Reviewed research is isolated per vacancy in `companyResearch`, separate from CV evidence and extra screening-call notes. It persists only when the user creates the pack and has enabled encrypted saving. Existing packs without research continue to work. Removing the source and notes asks before deleting the corresponding practice answer; deleting the pack removes its research. Clear/expiry and backup rules are unchanged.
+
+Full PDF, Word and text exports share a “Know the company” section containing the supplied notes and source, a four-point research checklist, and a company-knowledge question with an answer starter. A URL alone is explicitly labelled as a source to research, not retrieved facts. Both cheat sheets include a bounded source/research reminder and retain their two-page layout. Up to 13 practice answers are supported so the additional question does not displace closing or screening-call answers. Downloads are unencrypted and include the research the user reviewed.

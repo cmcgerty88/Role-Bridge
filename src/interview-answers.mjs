@@ -1,3 +1,4 @@
+import { cleanCompanyResearch } from './company-research.mjs';
 // Editorial examples are separate from the candidate's evidence. They are never
 // written into saved answers or represented as events in the candidate's career.
 const approaches = {
@@ -47,6 +48,11 @@ export function sampleAnswer(question, job, pack) {
     label = 'Answer starter using your reviewed CV — complete the brackets';
     text = `My recent experience is in ${pack.prep?.role || pack.summary || '[your role]'}. ${evidence ? `One example is: “${evidence}”` : '[Add one genuine work example.]'} My own contribution was [specific action], and the outcome was [result I can support]. This connects to your need for [one advert priority]. I would bring that experience while learning [an area specific to this team].`;
   } else if (question.id === 'motivation') text = 'I am interested in the work itself, particularly [a responsibility in this advert]. It connects to [a genuine strength or interest] and the kind of contribution I want to make next. From [a company source I checked], I understand [verified priority]. I would like to learn more about how this role contributes to that priority and what success looks like in the first few months.';
+  else if (question.id === 'company-knowledge') {
+    const research = cleanCompanyResearch(pack.companyResearch);
+    label = 'Company-research answer starter — complete with checked facts';
+    text = `From ${research.url || '[the company source I checked]'}, my understanding is that you [what the company does] for [customers or users]. I was particularly interested in [a specific product, value or priority from my research], because [my genuine reason]. This ${job.title} role connects to that through [responsibility in the advert]. In my own work, [one truthful example and supported result] would be relevant. I would like to understand how the team is approaching [an informed question].`;
+  }
   else if (question.id === 'closing') text = 'What would you most want the person in this role to achieve in the first 90 days? What is the biggest challenge they will inherit, and how will success be measured? I would also like to understand the support available while learning your systems. Finally, what are the next steps and expected timing?';
   else if (question.id === 'context-company') text = 'My notes suggest that [priority from my company research or screening call] is important to the team. Is that still the main focus? A relevant example from my experience is [genuine example], where my contribution was [action and supported outcome]. I would first understand your current situation before assuming that the same approach would work here.';
   else if (question.id === 'context-process') text = 'I would confirm the format, timing and assessment areas from the invitation or recruiter. I would practise relevant examples aloud and prepare any task that has actually been requested. If an instruction was unclear, I would ask rather than guess. I would check travel or technology beforehand and leave time to settle in.';

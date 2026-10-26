@@ -1,3 +1,4 @@
+import { companyResearchReminder, hasCompanyResearch } from './company-research.mjs';
 import { findSkillMentions, hasPhrase, normalise } from './model.mjs';
 import { interviewQuestions } from './interviews.mjs';
 import { cleanInterviewContext } from './interview-context.mjs';
@@ -49,13 +50,14 @@ export function preparationEvidenceBlocks(pack) {
 // Explicit line budgets keep this readable on one A4 page. Full source statements
 // remain in the preparation pack; shortened preview excerpts end in an ellipsis.
 export function cheatSheetBlocks(job, pack) {
-  const context = cleanInterviewContext(pack.interviewContext), hasContext = context.status === 'provided';
+  const context = cleanInterviewContext(pack.interviewContext), hasContext = context.status === 'provided' || hasCompanyResearch(pack);
+  const companyNotes = [companyResearchReminder(pack), context.company].filter(Boolean).join(' ');
   const source = interviewEvidence(pack), examples = lines(source.evidence).slice(0, 3);
   const questions = interviewQuestions(job, pack).filter(q => !['motivation', 'closing'].includes(q.id)).slice(0, 3);
   return [block('Interview cheat sheet', 'title', 1), block(`${job.title}${job.employer ? ' · ' + job.employer : ''}`, 'subtitle', 2),
     block(`My starting point: ${source.role}. Skills: ${source.skills || 'Review the examples below.'}`, 'body', hasContext ? 2 : 3),
     ...(hasContext ? [block('Company & process — my supplied notes', 'heading', 1),
-      ...(context.company ? [block('Company: ' + context.company, 'body', 2)] : []),
+      ...(companyNotes ? [block('Company: ' + companyNotes, 'body', 2)] : []),
       ...(context.process ? [block('Interview: ' + context.process, 'body', 2)] : [])] : []),
     block('My examples — prompts, not a script', 'heading', 1),
     ...examples.map((example, i) => block(`${i + 1}. ${example}`, 'body', hasContext ? 2 : 3)),
@@ -73,12 +75,13 @@ export function cheatSheetBlocks(job, pack) {
 // Two independently budgeted A4 sheets in one PDF: preparation, then the day itself.
 export function preInterviewSheetBlocks(job, pack) {
   const source = interviewEvidence(pack), context = cleanInterviewContext(pack.interviewContext);
+  const companyNotes = [companyResearchReminder(pack), context.company].filter(Boolean).join(' ');
   return [block('Pre-interview checklist', 'title', 1), block(`${job.title}${job.employer ? ' · ' + job.employer : ''}`, 'subtitle', 2),
     block('1. Know the role', 'heading', 1), ...lines(pack.focus).slice(0, 3).map(text => block('Check: ' + text, 'body', 2)),
     block('2. Prepare three truthful examples', 'heading', 1), ...lines(source.evidence).slice(0, 3).map((text, i) => block(`${i + 1}. ${text}`, 'body', 2)),
     block('For each: explain the situation, your task, your actions and a result you can support. Identify gaps honestly.', 'body', 2),
     block('3. Research and confirm', 'heading', 1),
-    block(context.company ? 'My company notes: ' + context.company : 'Check the company website, team priorities and why the role exists. Prepare one informed question.', 'body', 3),
+    block(companyNotes ? 'My company notes: ' + companyNotes : 'Check the company website, team priorities and why the role exists. Prepare one informed question.', 'body', 3),
     block(context.process ? 'My process notes: ' + context.process : 'Confirm the time, time zone, format, panel roles and any requested task or presentation.', 'body', 3),
     block('4. Rehearse and get ready', 'heading', 1),
     block('Practise a 60–90 second introduction and two STAR answers aloud. Replace all sample-answer brackets with your own facts.', 'body', 2),
