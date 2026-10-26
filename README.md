@@ -40,7 +40,7 @@ The original [fictional demo](research/rolebridge-demo.html), [sample PDF](resea
 - Interview questions and labelled sample answers for all 17 editorial roles, plus general, advert and company/process prompts; personal practice notes; matching PDF/Word/text packs; pre-interview and interview-day cheat sheets in one PDF.
 - Responsive layout and keyboard-accessible forms/dialogs.
 
-There is no external AI analysis, email delivery, hosted account, cloud database or automatic application sending. Once configured, a scheduled collector retrieves a limited shared pool of public Reed search results; it never receives candidate searches or CVs. Vacancy links are not fetched by the app. Shared skill words do not prove qualification; open listings do not prove active hiring. Current market research in the report remains provisional.
+There is no external AI analysis, hosted candidate account, cloud candidate database or automatic application sending. Optional feedback email delivery uses a separately configured form service; candidate documents are not attached. Once configured, a scheduled collector retrieves a limited shared pool of public Reed search results; it never receives candidate searches or CVs. Vacancy links are not fetched by the app. Shared skill words do not prove qualification; open listings do not prove active hiring. Current market research in the report remains provisional.
 
 OpenAI integration is deliberately deferred. This release needs no API key, billing setup, server or additional hosting. The existing GitHub Pages deployment serves the role catalogue and matching logic locally.
 
@@ -62,7 +62,7 @@ CV-reading limits: 5 MB per file, 30 PDF pages and 100,000 extracted characters.
 
 ## Personal data
 
-The CV readers are bundled and served from this repository; no CDN is used. CV files and their text are processed in the browser and are not uploaded. The browser makes no analytics or external API calls. Explicit job-site search links send the displayed role/location to the chosen site; no CV or skill list is included. A separately configured GitHub Actions job can call Reed for public listings; candidate data is not part of those calls. GitHub Pages still receives ordinary hosting requests, and employer links open external websites when selected.
+The CV readers are bundled and served from this repository; no CDN is used. CV files and their text are processed in the browser and are not uploaded. The job-search workspace makes no analytics or external API calls. The separate, optional feedback page sends only seven explicitly entered answers to Formspree when configured; it never reads the workspace or CV. Explicit job-site search links send the displayed role/location to the chosen site; no CV or skill list is included. A separately configured GitHub Actions job can call Reed for public listings; candidate data is not part of those calls. GitHub Pages still receives ordinary hosting requests, and employer links open external websites when selected.
 
 New passwords require 14–256 characters, at least one uppercase letter and one special character (punctuation or a symbol; spaces and numbers alone do not count). Existing workspace passwords and backups still unlock using the original password.
 
@@ -134,3 +134,7 @@ Interview snapshots and company/process notes are bounded, excluded from persist
 Downloads are **unencrypted**, may contain personal work examples, and must be reviewed, stored and deleted by the user. Raw CV text, contact fields, unrelated jobs and preferences are excluded. The app cannot delete files outside the browser. OpenAI stays disconnected.
 
 The paused CV builder source is not imported by the live app. Its UI browser scenarios are preserved under `tests/deferred-cv/` outside the active test suite; pure data/export and migration checks remain active. Legacy data is retained for explicit backup/deletion, not exposed as an available feature.
+
+## Website feedback
+
+The separate [feedback page](feedback/index.html) presents seven beta-feedback questions. Sending and main-site links remain disabled/hidden until `src/feedback-config.mjs` contains a valid public Formspree form endpoint. Set the recipient privately in the provider account; never put it in client code. See [setup and delivery checks](docs/FEEDBACK-SETUP.md). The feedback page imports no workspace modules, does not read/write browser storage, and sends only the reviewed survey answers after an explicit consent checkbox and submit action. Email delivery has not been verified merely by passing browser tests.

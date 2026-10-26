@@ -1,6 +1,6 @@
 # RoleBridge — beta feedback questionnaire
 
-Status: ready-to-import draft, not a live Microsoft Form. Organiser label supplied by the owner: **RoleBridge Admin**. The owner supplied the public contact address below. Confirm the participant notice and retention period before collecting responses.
+Status: questionnaire reference for the website feedback page; the Word version remains an optional import draft. Organiser label supplied by the owner: **RoleBridge Admin**. Set the recipient privately in the feedback service when enabling delivery, not in public documents. Confirm the participant notice and retention period before collecting responses.
 
 ## Form title
 
@@ -12,9 +12,9 @@ Thanks for trying RoleBridge. These seven questions take about 2–3 minutes and
 
 Feedback is voluntary. We do not ask for your name or email. Please leave out CV text, names, employer details, contact information and other private or confidential information. You can skip the written questions.
 
-Your responses are collected through Microsoft Forms and will be reviewed by RoleBridge Admin to improve the beta. The proposed retention period is 30 days after this pilot ends, after which responses and downloaded response files will be deleted. This is a planned manual process, not automatic deletion. Because we do not ask for identifying details, we may not be able to locate a particular response.
+On the website, your responses are collected through Formspree and will be reviewed by RoleBridge Admin to improve the beta. The proposed retention period is 30 days after this pilot ends, after which responses and downloaded response files will be deleted. This is a planned manual process, not automatic deletion. Because we do not ask for identifying details, we may not be able to locate a particular response.
 
-Questions about your feedback: **colinmcgerty88@gmail.com**.
+Questions about feedback handling can be submitted through the website feedback form once sending is enabled.
 
 ## Questions and settings
 

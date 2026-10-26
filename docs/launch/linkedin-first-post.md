@@ -1,6 +1,6 @@
 # RoleBridge — first LinkedIn page post
 
-Draft: replace the feedback-form placeholder with your Microsoft Forms **Collect responses** link before posting. This is the respondent link, not an edit, collaboration or results link.
+Draft: enable and verify website feedback delivery using docs/FEEDBACK-SETUP.md before posting. The page keeps sending disabled until configured.
 
 ---
 
@@ -23,7 +23,7 @@ Could you spare 10–15 minutes? Try one task that matters to your job search, t
 
 👉 Try the website: https://cmcgerty88.github.io/Role-Bridge/
 
-📝 Share your feedback: [ADD YOUR MICROSOFT FORMS RESPONSE LINK]
+📝 Share your feedback: https://cmcgerty88.github.io/Role-Bridge/feedback/
 
 No account is needed to try the website. Your CV is processed in your browser rather than uploaded to a server. You can use sample information if you prefer.
 

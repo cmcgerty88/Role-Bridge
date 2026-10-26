@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html styles.css .nojekyll README.md _site/
-          cp -R src vendor research data docs _site/
+          cp -R src vendor research data docs feedback _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

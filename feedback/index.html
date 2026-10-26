@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://formspree.io; img-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Help shape RoleBridge. Share feedback on your job-search experience in seven short questions.">
+  <title>Beta feedback — RoleBridge</title>
+  <link rel="icon" type="image/png" href="../src/assets/rolebridge-logo.png">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../src/feedback.css">
+  <script type="module" src="../src/feedback-page.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to feedback</a>
+  <div class="shell">
+    <header class="site-header"><a class="brand" href="../" aria-label="RoleBridge home"><img class="brand-mark" src="../src/assets/rolebridge-logo.png" width="40" height="40" alt="">RoleBridge</a><a href="../" class="small">Back to website</a></header>
+    <main id="main" class="feedback-page">
+      <p class="eyebrow">Help shape RoleBridge · Beta</p>
+      <h1>How was your experience?</h1>
+      <p class="intro">Seven short questions. About 2–3 minutes. Tell us what helped and what needs work—honest feedback is useful, even if you got stuck.</p>
+      <p class="feedback-privacy">Only the answers you enter here are sent. Your CV, profile, saved jobs and interview notes are not attached. Please leave out names, CV text, employer details and other private or confidential information.</p>
+      <details class="feedback-notice"><summary>How your feedback is handled</summary><p>Feedback is voluntary. We don’t ask for your name or email. Your answers are sent through <a href="https://formspree.io/legal/privacy-policy/" target="_blank" rel="noopener noreferrer">Formspree</a> to RoleBridge Admin’s private inbox to improve this beta. Formspree also processes request information such as IP addresses for service operation and spam prevention; this form is not a guarantee of anonymity.</p><p>RoleBridge Admin plans to delete feedback emails, provider submissions and any response exports 30 days after this pilot ends. This is a manual process. Browser data controls on the main site cannot delete feedback already sent. Because we don’t ask for identifying details, we may not be able to locate a particular response.</p><p>This page does not read or save your workspace. Unsent answers stay in this tab and can be cleared below. You can also use the written questions for a feedback-handling query, without including CV content.</p></details>
+      <noscript><p class="notice">Enable JavaScript to use this form. Nothing has been sent.</p></noscript>
+      <p id="feedback-unavailable" class="notice">Feedback sending is not available yet. Please come back later. Nothing will be sent or saved from this page.</p>
+      <form id="feedback-form" class="feedback-form" autocomplete="off" novalidate>
+        <fieldset id="feedback-fields" class="feedback-fields" disabled>
+          <div id="feedback-questions"></div>
+          <div hidden aria-hidden="true"><label for="feedback-website">Leave this empty</label><input id="feedback-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+          <label class="check feedback-consent"><input id="feedback-consent" type="checkbox" required><span>I choose to send these answers to RoleBridge Admin through Formspree. I have left out private or confidential information.</span></label>
+        </fieldset>
+        <p id="feedback-status" class="feedback-status" role="status" aria-live="polite" tabindex="-1"></p>
+        <div class="form-bottom split"><button id="feedback-clear" class="text-button" type="button" disabled>Clear my answers</button><button id="feedback-send" class="primary" type="submit" disabled>Send feedback <span aria-hidden="true">→</span></button></div>
+      </form>
+      <section id="feedback-success" class="card" hidden aria-labelledby="feedback-success-title"><h2 id="feedback-success-title" tabindex="-1">Thank you for helping shape RoleBridge.</h2><p>Your feedback has been accepted by our feedback service. It will help us prioritise improvements.</p><p>If you opened this page from RoleBridge, close this tab to return to your job search.</p><a class="primary" href="../">Go to RoleBridge</a></section>
+    </main>
+    <footer><span>RoleBridge · A clearer path to your next job.</span><a href="../">Back to website</a></footer>
+  </div>
+</body>
+</html>
