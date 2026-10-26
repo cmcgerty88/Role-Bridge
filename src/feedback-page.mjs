@@ -27,9 +27,9 @@ for (const [index, question] of FEEDBACK_QUESTIONS.entries()) {
 }
 const configured = validFeedbackEndpoint(FEEDBACK_ENDPOINT);
 $('feedback-unavailable').hidden = configured;
-fields.disabled = !configured;
+fields.disabled = false;
 $('feedback-send').disabled = !configured;
-$('feedback-clear').disabled = !configured;
+$('feedback-clear').disabled = false;
 form.addEventListener('input', () => { dirty = true; status.textContent = ''; });
 window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
 $('feedback-clear').addEventListener('click', () => {

@@ -16,15 +16,33 @@ async function intercept(context, handler) {
 }
 const response = (route, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"recipient":"private-recipient@example.test"}' });
 
-test('unconfigured feedback stays disabled and does not advertise an unusable form', async ({ page, context }) => {
+test('unconfigured feedback is reachable and editable, but cannot send or silently save answers', async ({ page, context }) => {
   await configure(context, false);
   const requests = []; await intercept(context, route => { requests.push(route.request()); return response(route); });
-  await page.goto('/'); await expect(page.locator('[data-feedback-link]').first()).toBeHidden();
-  await page.goto('/feedback/');
-  await expect(page.locator('.feedback-question')).toHaveCount(7);
-  await expect(page.locator('#feedback-unavailable')).toBeVisible();
-  await expect(page.locator('#feedback-send')).toBeDisabled();
-  await expect(page.locator('#feedback-improvement')).toBeDisabled();
+  await page.goto('/');
+  await expect(page.locator('[data-feedback-link]').first()).toBeVisible();
+  await expect(page.locator('footer [data-feedback-link]')).toBeVisible();
+  const popupPromise = context.waitForEvent('page');
+  await page.locator('[data-feedback-link]').first().click();
+  const feedback = await popupPromise;
+  await expect(feedback).toHaveURL(/\/feedback\/$/);
+  await expect(feedback.locator('.feedback-question')).toHaveCount(7);
+  await expect(feedback.locator('#feedback-unavailable')).toContainText('Preview only');
+  await expect(feedback.locator('#feedback-send')).toBeDisabled();
+  await fill(feedback);
+  await expect(feedback.locator('input[name="task"][value="interview"]')).toBeChecked();
+  await expect(feedback.locator('#feedback-improvement')).toHaveValue('Clearer next steps');
+  await feedback.locator('#feedback-form').evaluate(form => form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })));
+  await expect(feedback.locator('#feedback-success')).toBeHidden();
+  expect(requests).toHaveLength(0);
+  feedback.once('dialog', dialog => dialog.accept()); await feedback.locator('#feedback-clear').click();
+  await expect(feedback.locator('#feedback-improvement')).toHaveValue('');
+  await expect(feedback.locator('input[name="task"][value="interview"]')).not.toBeChecked();
+  await fill(feedback);
+  feedback.once('dialog', dialog => dialog.accept()); await feedback.reload();
+  await expect(feedback.locator('#feedback-improvement')).toHaveValue('');
+  await expect(feedback.locator('#feedback-consent')).not.toBeChecked();
+  expect(await feedback.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
   expect(requests).toHaveLength(0);
 });
 

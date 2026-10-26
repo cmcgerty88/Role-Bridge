@@ -4,7 +4,7 @@
 
 The HTML page is at `feedback/index.html` and will publish at https://cmcgerty88.github.io/Role-Bridge/feedback/. The seven questions stay on the website. Formspree handles receipt and forwarding to an email address configured privately in its dashboard. No hosting move or OpenAI integration is needed. Formspree offers a free tier with submission limits; check the current account quota and terms before enabling it.
 
-The default endpoint is blank. Sending is disabled and main-site feedback links are hidden until a valid endpoint is supplied. The page remains directly accessible for review, with an explicit unavailable message. Nothing is queued, saved or sent while unconfigured. Automated tests use intercepted requests only; they do not verify real email delivery.
+The default endpoint is blank. Homepage and footer feedback links are visible and open a separate tab. Answers can be selected, typed and cleared even before configuration. Sending remains disabled until a valid endpoint is supplied, with an explicit preview notice explaining that answers are lost on refresh or close. Nothing is queued, saved or sent while unconfigured. Automated tests use intercepted requests only; they do not verify real email delivery.
 
 ## The one connection needed
 

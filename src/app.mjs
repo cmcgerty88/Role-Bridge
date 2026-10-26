@@ -1,5 +1,3 @@
-import { FEEDBACK_ENDPOINT } from './feedback-config.mjs';
-import { validFeedbackEndpoint } from './feedback.mjs';
 import { initInterviewPrep } from './interview-prep-ui.mjs';
 import { searchNextAction, upcomingInterviews } from './search-journey.mjs';
 import { cvProfileDraft } from './cv-profile.mjs';
@@ -15,7 +13,6 @@ import { ROLE_CATALOGUE, exploreRoles, matchRole, roleById, prepareSearchTerms }
 
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => { const value = document.createElement(tag); if (text !== undefined) value.textContent = text; if (className) value.className = className; return value; };
-document.querySelectorAll('[data-feedback-link]').forEach(link => { link.hidden = !validFeedbackEndpoint(FEEDBACK_ENDPOINT); });
 let state = blankState();
 let profileReviewed = false, entryStep = 0;
 let currentStep = 1, fileGeneration = 0, pendingRemoval = null;
