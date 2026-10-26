@@ -5,7 +5,7 @@
 - [Seven-question feedback form and proposed notice](tester-feedback.md)
 - [Word questionnaire for Microsoft Forms import](rolebridge-tester-questionnaire.docx)
 
-The post has not been published and a live Microsoft Form has not been created. The recipient will be configured privately in the feedback service when delivery is enabled. No recipient address belongs in these public files. The website stays at https://cmcgerty88.github.io/Role-Bridge/; no hosting migration or OpenAI integration is part of this release.
+The post has not been published and a live Microsoft Form has not been created. The owner-supplied Formspree endpoint is configured; recipient settings and inbox delivery still need checking privately in the service account and mailbox. No recipient address belongs in these public files. The website stays at https://cmcgerty88.github.io/Role-Bridge/; no hosting migration or OpenAI integration is part of this release.
 
 ## Add the banner
 

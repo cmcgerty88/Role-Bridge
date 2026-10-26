@@ -4,9 +4,11 @@
 
 The HTML page is at `feedback/index.html` and will publish at https://cmcgerty88.github.io/Role-Bridge/feedback/. The seven questions stay on the website. Formspree handles receipt and forwarding to an email address configured privately in its dashboard. No hosting move or OpenAI integration is needed. Formspree offers a free tier with submission limits; check the current account quota and terms before enabling it.
 
-The default endpoint is blank. Homepage and footer feedback links are visible and open a separate tab. Answers can be selected, typed and cleared even before configuration. Sending remains disabled until a valid endpoint is supplied, with an explicit preview notice explaining that answers are lost on refresh or close. Nothing is queued, saved or sent while unconfigured. Automated tests use intercepted requests only; they do not verify real email delivery.
+The owner-supplied public endpoint `https://formspree.io/f/mgaaazwd` is configured. After publication, sending is enabled and the preview-only notice is hidden. Homepage and footer feedback links open a separate tab. Recipient settings and inbox delivery still need to be verified in the owner's Formspree account and mailbox. Automated tests use intercepted requests only; they do not verify real email delivery.
 
-## The one connection needed
+To disable delivery, set the endpoint to an empty string and republish. Answers can still be selected, typed and cleared, but sending is disabled and a preview notice explains that answers are lost on refresh or close. Nothing is queued, saved or sent while unconfigured.
+
+## Configuration and delivery checks
 
 1. Create a form in your own account at https://formspree.io/. Set the destination email privately in that account and complete the provider's verification steps.
 2. Copy its **public form endpoint**, shaped like `https://formspree.io/f/abcdefgh`. This form ID is safe to put in the site; it is not an API key. Do not use an endpoint containing the email address.
