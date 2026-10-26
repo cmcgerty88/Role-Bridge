@@ -2,16 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { FEEDBACK_QUESTIONS, validFeedbackEndpoint, feedbackPayload, submitFeedback } from '../src/feedback.mjs';
 const endpoint = 'https://formspree.io/f/testform';
-const answers = () => ({ task: 'interview', start: 'quite-easy', completion: 'alone', usefulness: 'very', problems: '', return: 'very-likely', improvement: 'Clearer next steps', consent: true });
+const answers = () => ({ task: 'interview', start: 'quite-easy', completion: 'alone', usefulness: 'very', problems: '', return: 'very-likely', improvement: 'Clearer next steps', willingness_to_pay: '7.99', consent: true });
 
 test('feedback accepts only public form-ID endpoints, never email routes or other destinations', () => {
   assert.equal(validFeedbackEndpoint(endpoint), true);
   for (const url of ['', null, 'http://formspree.io/f/testform', 'https://formspree.io/private@example.test', endpoint + '?email=private@example.test', endpoint + '#fragment', endpoint + '/', 'https://formspree.io.evil.test/f/testform', 'https://user:password@formspree.io/f/testform']) assert.equal(validFeedbackEndpoint(url), false);
 });
-test('feedback whitelists seven readable answers, excluding workspace and contact fields', () => {
+test('feedback whitelists eight readable answers, excluding workspace and contact fields', () => {
   const payload = feedbackPayload({ ...answers(), cv: 'PRIVATE_CV', email: 'private@example.test', profile: { secret: true }, _subject: 'override' });
-  assert.equal(FEEDBACK_QUESTIONS.length, 7);
-  assert.equal(Object.keys(payload).length, 10);
+  assert.equal(FEEDBACK_QUESTIONS.length, 8);
+  assert.equal(Object.keys(payload).length, 11);
   assert.equal(payload._subject, 'RoleBridge beta feedback');
   assert.equal(payload[`1. ${FEEDBACK_QUESTIONS[0].title}`], 'Prepare for an interview');
   assert.equal(payload[`5. ${FEEDBACK_QUESTIONS[4].title}`], 'Not answered');
@@ -20,7 +20,7 @@ test('feedback whitelists seven readable answers, excluding workspace and contac
 test('invalid choices, missing consent, spam and oversized text never reach the service', async () => {
   let calls = 0;
   const options = { fetchImpl: async () => { calls++; return { ok: true }; } };
-  for (const patch of [{ consent: false }, { consent: 'true' }, { task: 'invented' }, { start: '' }, { website: 'spam' }, { problems: 'x'.repeat(1001) }, { improvement: {} }]) {
+  for (const patch of [{ consent: false }, { consent: 'true' }, { task: 'invented' }, { willingness_to_pay: 'invented-price' }, { willingness_to_pay: '' }, { start: '' }, { website: 'spam' }, { problems: 'x'.repeat(1001) }, { improvement: {} }]) {
     await assert.rejects(submitFeedback(endpoint, { ...answers(), ...patch }, options));
   }
   await assert.rejects(submitFeedback('', answers(), options));
@@ -50,4 +50,16 @@ test('timeout reports uncertain delivery and never retries automatically', async
     calls++; return new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(Error('timeout'))));
   } }), /may have received them/);
   assert.equal(calls, 1);
+});
+
+
+test('willingness to pay records each price or non-paying response without creating a subscription', () => {
+  const question = FEEDBACK_QUESTIONS.find(q => q.id === 'willingness_to_pay');
+  assert.deepEqual(question.options.map(([id]) => id), ['4.99', '7.99', '9.99', 'more', 'no', 'unsure']);
+  for (const [value, label] of question.options) {
+    const payload = feedbackPayload({ ...answers(), willingness_to_pay: value });
+    assert.equal(payload[`8. ${question.title}`], label);
+    assert.equal(payload.form_version, '2');
+    assert.equal(Object.keys(payload).length, 11);
+  }
 });

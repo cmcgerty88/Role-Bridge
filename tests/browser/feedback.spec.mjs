@@ -4,7 +4,7 @@ async function configure(context, enabled = true) {
   await context.route('**/src/feedback-config.mjs', route => route.fulfill({ contentType: 'text/javascript', body: `export const FEEDBACK_ENDPOINT = '${enabled ? endpoint : ''}';` }));
 }
 async function fill(page) {
-  for (const [name, value] of Object.entries({ task: 'interview', start: 'quite-easy', completion: 'alone', usefulness: 'very', return: 'very-likely' })) await page.locator(`input[name="${name}"][value="${value}"]`).check();
+  for (const [name, value] of Object.entries({ task: 'interview', start: 'quite-easy', completion: 'alone', usefulness: 'very', return: 'very-likely', willingness_to_pay: '7.99' })) await page.locator(`input[name="${name}"][value="${value}"]`).check();
   await page.locator('#feedback-improvement').fill('Clearer next steps');
   await page.locator('#feedback-consent').check();
 }
@@ -26,7 +26,7 @@ test('unconfigured feedback is reachable and editable, but cannot send or silent
   await page.locator('[data-feedback-link]').first().click();
   const feedback = await popupPromise;
   await expect(feedback).toHaveURL(/\/feedback\/$/);
-  await expect(feedback.locator('.feedback-question')).toHaveCount(7);
+  await expect(feedback.locator('.feedback-question')).toHaveCount(8);
   await expect(feedback.locator('#feedback-unavailable')).toContainText('Preview only');
   await expect(feedback.locator('#feedback-send')).toBeDisabled();
   await fill(feedback);
@@ -56,6 +56,8 @@ test('only explicit feedback is sent; no workspace storage is accessed and succe
   const errors = [], requests = []; page.on('pageerror', error => errors.push(error.message));
   await intercept(context, route => { requests.push(route.request()); return response(route); });
   await page.goto('/feedback/'); await expect(page.locator('#feedback-send')).toBeEnabled();
+  await expect(page.locator('input[name="willingness_to_pay"]:checked')).toHaveCount(0);
+  await expect(page.locator('body')).toContainText('The beta is free.');
   await page.locator('#feedback-send').click(); expect(requests).toHaveLength(0);
   await fill(page);
   await page.locator('#feedback-consent').uncheck(); await page.locator('#feedback-send').click(); expect(requests).toHaveLength(0);
@@ -63,7 +65,9 @@ test('only explicit feedback is sent; no workspace storage is accessed and succe
   await expect(page.locator('#feedback-success')).toBeVisible();
   expect(requests).toHaveLength(1);
   const request = requests[0];
-  expect(Object.keys(request.postDataJSON())).toHaveLength(10);
+  expect(Object.keys(request.postDataJSON())).toHaveLength(11);
+  expect(Object.entries(request.postDataJSON()).find(([key]) => key.startsWith('8. '))?.[1]).toBe('£7.99 per month');
+  expect(request.postDataJSON().form_version).toBe('2');
   expect(request.postData()).not.toMatch(/PRIVATE_CV_MARKER|synthetic-private-cv/);
   expect(request.headers().referer).toBeUndefined(); expect(request.headers().cookie).toBeUndefined();
   await expect(page.locator('#feedback-improvement')).toHaveValue('');
@@ -109,4 +113,14 @@ test('main-site link opens a separate tab and preserves the unsaved profile', as
   await expect(popup.locator('#feedback-send')).toBeEnabled();
   await expect(page.locator('#currentRole')).toHaveValue('Synthetic unsaved role');
   await popup.close();
+});
+
+
+test('homepage explains the initial IT focus and free beta on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 }); await page.goto('/');
+  await expect(page.locator('#hero-title')).toContainText('next IT role');
+  await expect(page.locator('#it-beta-focus')).toBeVisible();
+  await expect(page.locator('#it-beta-focus')).toContainText('release and change management');
+  await expect(page.locator('.hero')).toContainText('Free during beta.');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });

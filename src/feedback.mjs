@@ -1,4 +1,4 @@
-// Independent of the job-search workspace: only these seven answers can be sent.
+// Independent of the job-search workspace: only these eight answers can be sent.
 export const FEEDBACK_QUESTIONS = [
   { id: 'task', title: 'What was the main thing you wanted RoleBridge to help you do today?', options: [
     ['roles', 'Work out which roles might suit my experience'], ['vacancies', 'Find vacancies to explore'], ['match', 'Check my experience against a job description'], ['interview', 'Prepare for an interview'], ['tracking', 'Track applications or decide what to do next'], ['exploring', 'Look around without a specific task'], ['other', 'Something else']
@@ -16,7 +16,10 @@ export const FEEDBACK_QUESTIONS = [
   { id: 'return', title: 'How likely are you to use RoleBridge again for a future job-search task?', options: [
     ['very-likely', 'Very likely'], ['quite-likely', 'Quite likely'], ['neutral', 'Neither likely nor unlikely'], ['quite-unlikely', 'Quite unlikely'], ['very-unlikely', 'Very unlikely'], ['unsure', 'I’m not sure yet']
   ] },
-  { id: 'improvement', title: 'What one change would make RoleBridge more useful to you?', hint: 'A sentence or two is enough. Leave out personal or confidential information. Up to 1,000 characters.' }
+  { id: 'improvement', title: 'What one change would make RoleBridge more useful to you?', hint: 'A sentence or two is enough. Leave out personal or confidential information. Up to 1,000 characters.' },
+  { id: 'willingness_to_pay', title: 'Would you be willing to pay for RoleBridge in the future to help with your job search? If so, how much per month?', hint: 'Choose one answer based on what you tried. The beta is free. This is research only, not a subscription or a commitment to pay.', options: [
+    ['4.99', '£4.99 per month'], ['7.99', '£7.99 per month'], ['9.99', '£9.99 per month'], ['more', 'It’s worth more — over £9.99 per month'], ['no', 'I wouldn’t pay for this service'], ['unsure', 'Not sure yet']
+  ] }
 ];
 export function validFeedbackEndpoint(value) {
   // A provider form ID is public; email-based routes and arbitrary destinations are rejected.
@@ -25,7 +28,7 @@ export function validFeedbackEndpoint(value) {
 export function feedbackPayload(values) {
   if (!values || values.consent !== true) throw new Error('Please confirm that you want to send these answers.');
   if (values.website) throw new Error('This response could not be submitted.');
-  const result = { _subject: 'RoleBridge beta feedback', form_version: '1', _gotcha: '' };
+  const result = { _subject: 'RoleBridge beta feedback', form_version: '2', _gotcha: '' };
   for (const [index, q] of FEEDBACK_QUESTIONS.entries()) {
     const value = values[q.id];
     let answer;

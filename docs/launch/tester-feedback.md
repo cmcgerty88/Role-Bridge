@@ -8,7 +8,7 @@ RoleBridge beta — tell us what you think
 
 ## Form description
 
-Thanks for trying RoleBridge. These seven questions take about 2–3 minutes and will help us improve the job-search journey. Please answer based on what you actually tried; it's useful to hear where something didn't work.
+Thanks for trying RoleBridge. These eight questions take about 3 minutes and will help us improve the job-search journey. Please answer based on what you actually tried; it's useful to hear where something didn't work.
 
 Feedback is voluntary. We do not ask for your name or email. Please leave out CV text, names, employer details, contact information and other private or confidential information. You can skip the written questions.
 
@@ -87,10 +87,23 @@ Type: Text. Long answer. Optional.
 
 Subtitle: A sentence or two is enough. Please don't include personal or confidential information.
 
+### 8. Would you be willing to pay for RoleBridge in the future to help with your job search? If so, how much per month?
+
+Type: Choice. One answer. Required. No answer preselected.
+
+Subtitle: Choose one answer based on what you tried. The beta is free. This is research only, not a subscription or a commitment to pay.
+
+- £4.99 per month
+- £7.99 per month
+- £9.99 per month
+- It’s worth more — over £9.99 per month
+- I wouldn’t pay for this service
+- Not sure yet
+
 ## Completion message
 
 Thank you for helping shape RoleBridge. Your feedback will help us prioritise improvements. You can return to the website at https://cmcgerty88.github.io/Role-Bridge/.
 
 ## How to use the feedback
 
-Look at the task chosen in question 1 alongside task completion (3) and usefulness (4). Questions 2 and 5 show navigation and content problems; question 7 helps prioritise a next improvement. Treat question 6 as stated intention, not proof of repeat use or demand. Report counts with the sample size for a small pilot, rather than implying statistical certainty. Keep raw feedback and response exports out of this public repository.
+Look at the task chosen in question 1 alongside task completion (3) and usefulness (4). Questions 2 and 5 show navigation and content problems; question 7 helps prioritise a next improvement. Treat question 6 as stated intention, not proof of repeat use or demand. Question 8 records a stated willingness to pay, not a purchase or a validated price. Include “wouldn’t pay” and “not sure” responses in the results; don’t report only positive responses. Report counts with the sample size for a small pilot, rather than implying statistical certainty. Keep raw feedback and response exports out of this public repository.

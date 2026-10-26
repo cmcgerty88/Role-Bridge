@@ -10,7 +10,7 @@ for (const [index, question] of FEEDBACK_QUESTIONS.entries()) {
   const group = element('fieldset'); group.className = 'feedback-question';
   const legend = element('legend', `${index + 1}. ${question.title}`); group.append(legend);
   if (question.options) {
-    const hint = element('p', 'Choose one answer.'); hint.className = 'hint'; group.append(hint);
+    const hint = element('p', question.hint || 'Choose one answer.'); hint.className = 'hint'; group.append(hint);
     for (const [value, label] of question.options) {
       const wrapper = element('label'); wrapper.className = 'feedback-choice';
       const input = element('input'); input.type = 'radio'; input.name = question.id; input.value = value; input.required = true;

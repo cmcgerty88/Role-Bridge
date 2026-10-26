@@ -1,6 +1,6 @@
 # RoleBridge
 
-A private, device-only pilot for anyone looking for work, including people facing redundancy. Three starting directions lead to finding suitable roles, checking job matches or preparing for an interview. The returning-user dashboard keeps saved jobs, interview preparation and application outcomes together. CV reading, matching and document creation happen locally. OpenAI remains disconnected.
+A private beta initially focused on IT jobseekers in the UK and Northern Ireland, including people facing redundancy. The initial emphasis is release/change management, technology delivery and IT service roles; other roles remain accessible with more limited guidance. Three starting directions lead to finding suitable roles, checking job matches or preparing for an interview. The returning-user dashboard keeps saved jobs, interview preparation and application outcomes together. CV reading, matching and document creation happen locally. OpenAI remains disconnected.
 
 The tailored CV builder is paused in v0.10.0 and is absent from the active journey. Its source and previously saved data are retained for a possible future return; new interview packs do not create hidden CV drafts.
 The homepage also welcomes people looking for their next role without redundancy. Northern Ireland visitors can open NIJobs searches or nijobfinder from the same vacancy page. nijobfinder prefills the selected role using its Keywords parameter, without restricting the job category; the user chooses a location on that site. These are external destinations, not additional imported feeds.
@@ -21,7 +21,7 @@ https://cmcgerty88.github.io/Role-Bridge/
 8. **My job search** provides a next action, saved jobs and upcoming interviews. Each job opens its own preparation and application update form. Scheduled interviews are separate from completed interviews. Outcome observations appear after three valid application records; they suggest experiments, not causes or hiring probabilities.
 9. Saving is optional and encrypted on this device. Returning users unlock existing data. Old profiles, interview notes and legacy CV fields remain compatible; deletion controls explain what is removed.
 
-For the first round of feedback, use the [first-user pilot guide](docs/FIRST-USER-PILOT.md).
+For the first round of feedback, use the [first-user pilot guide](docs/FIRST-USER-PILOT.md). Before planning the next version, revisit the [beta roadmap and deferred Cloudflare/OpenAI reminders](docs/BETA-ROADMAP.md).
 The original [fictional demo](research/rolebridge-demo.html), [sample PDF](research/rolebridge-sample.pdf), [provisional opportunity report](research/REEMPLOYMENT-OPPORTUNITY-REPORT.md) and [validation kit](research/VALIDATION-KIT.md) remain available.
 
 ## What works now
@@ -62,7 +62,7 @@ CV-reading limits: 5 MB per file, 30 PDF pages and 100,000 extracted characters.
 
 ## Personal data
 
-The CV readers are bundled and served from this repository; no CDN is used. CV files and their text are processed in the browser and are not uploaded. The job-search workspace makes no analytics or external API calls. The separate, optional feedback page sends only seven explicitly entered answers to Formspree when configured; it never reads the workspace or CV. Explicit job-site search links send the displayed role/location to the chosen site; no CV or skill list is included. A separately configured GitHub Actions job can call Reed for public listings; candidate data is not part of those calls. GitHub Pages still receives ordinary hosting requests, and employer links open external websites when selected.
+The CV readers are bundled and served from this repository; no CDN is used. CV files and their text are processed in the browser and are not uploaded. The job-search workspace makes no analytics or external API calls. The separate, optional feedback page sends only eight explicitly entered answers to Formspree when configured; it never reads the workspace or CV. Explicit job-site search links send the displayed role/location to the chosen site; no CV or skill list is included. A separately configured GitHub Actions job can call Reed for public listings; candidate data is not part of those calls. GitHub Pages still receives ordinary hosting requests, and employer links open external websites when selected.
 
 New passwords require 14–256 characters, at least one uppercase letter and one special character (punctuation or a symbol; spaces and numbers alone do not count). Existing workspace passwords and backups still unlock using the original password.
 
@@ -137,7 +137,7 @@ The paused CV builder source is not imported by the live app. Its UI browser sce
 
 ## Website feedback
 
-The separate [feedback page](feedback/index.html) presents seven beta-feedback questions. Homepage and footer links open the form in a new tab. The owner-supplied Formspree endpoint in `src/feedback-config.mjs` enables sending after publication; inbox delivery still needs verification. Clearing that endpoint disables sending and shows a preview notice while keeping questions editable. Set the recipient privately in the provider account; never put it in client code. See [setup and delivery checks](docs/FEEDBACK-SETUP.md). The feedback page imports no workspace modules, does not read/write browser storage, and sends only the reviewed survey answers after an explicit consent checkbox and submit action. Email delivery has not been verified merely by passing browser tests.
+The separate [feedback page](feedback/index.html) presents eight beta-feedback questions. Homepage and footer links open the form in a new tab. The owner-supplied Formspree endpoint in `src/feedback-config.mjs` enables sending after publication; inbox delivery still needs verification. Clearing that endpoint disables sending and shows a preview notice while keeping questions editable. Set the recipient privately in the provider account; never put it in client code. See [setup and delivery checks](docs/FEEDBACK-SETUP.md). The feedback page imports no workspace modules, does not read/write browser storage, and sends only the reviewed survey answers after an explicit consent checkbox and submit action. Email delivery has not been verified merely by passing browser tests.
 
 
 ## Company research in interview packs

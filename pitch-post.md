@@ -2,11 +2,11 @@
 
 ## Website sales pitch
 
-**Finding your next job can feel overwhelming. You don’t have to figure it all out at once.**
+**Finding your next IT role can feel overwhelming. You don’t have to figure it all out at once.**
 
 Whether you’ve been made redundant or are ready for a change, returning to the job market can be daunting—especially if you haven’t looked for work in years.
 
-RoleBridge helps you work through the process step by step: understand how your experience connects to different roles, explore vacancies, check job requirements, prepare for interviews and keep track of your progress.
+RoleBridge’s free beta initially focuses on IT careers, especially release/change management, technology delivery and IT service roles. It helps you work through the process step by step: understand how your experience connects to different roles, explore vacancies, check job requirements, prepare for interviews and keep track of your progress.
 
 Start with your CV or a few details about your experience. Build a clearer picture of where to focus and what to do next.
 
@@ -22,7 +22,7 @@ Being made redundant can suddenly put you back into a process that feels unfamil
 
 Which roles should you look for? How does your experience fit what employers want? Where should you focus your effort—and how do you keep track of it all?
 
-Having experienced redundancy myself, I’m building **RoleBridge** to help people navigate their way towards their next job, one step at a time.
+Having experienced redundancy myself, I’m building **RoleBridge** to help IT jobseekers navigate their way towards their next role, one step at a time. This free beta initially focuses on release/change management, technology delivery and IT service roles.
 
 It brings the main parts of a job search into one place:
 
@@ -49,4 +49,4 @@ Please comment or message me—there’s no need to share your CV or personal do
 
 If someone you know is finding the job search difficult, please pass this on. Their experience could help make RoleBridge more useful for others in the same position.
 
-#JobSearch #Redundancy #BackToWork #CareerSupport
+#ITJobs #TechCareers #JobSearch #Redundancy
