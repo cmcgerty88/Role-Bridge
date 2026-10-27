@@ -119,8 +119,7 @@ test('main-site link opens a separate tab and preserves the unsaved profile', as
 test('homepage explains the initial IT focus and free beta on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 }); await page.goto('/');
   await expect(page.locator('#hero-title')).toContainText('next IT role');
-  await expect(page.locator('#it-beta-focus')).toBeVisible();
-  await expect(page.locator('#it-beta-focus')).toContainText('release and change management');
+  await expect(page.locator('#it-beta-focus')).toHaveCount(0);
   await expect(page.locator('.hero')).toContainText('Free during beta.');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });

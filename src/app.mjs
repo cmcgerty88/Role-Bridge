@@ -16,7 +16,7 @@ const node = (tag, text, className) => { const value = document.createElement(ta
 let state = blankState();
 let profileReviewed = false, entryStep = 0;
 let currentStep = 1, fileGeneration = 0, pendingRemoval = null;
-let workspace, vacancies, interviewPrep;
+let workspace, vacancies, interviewPrep, workspaceStarted = false, pendingSidebarStep = null, homeRequestedDuringEntry = false;
 // Original field values remain the saved version until the person reviews the import.
 const pendingCvFields = new Map();
 const profileForm = $('profile-form'), preferencesForm = $('preferences-form'), jobForm = $('job-form');
@@ -61,6 +61,7 @@ function showStep(step, focus = true) {
   if (step === 10) interviewPrep.open();
   if (step === 8) vacancies.open();
   $('tool-menu').open = false;
+  updateSidebar();
   document.querySelector('.journey-nav').hidden = step === 0;
   if (focus) {
     const heading = $({ 0: 'situation-title', 1: 'experience-title', 2: 'preferences-title', 3: 'directions-title', 4: 'vacancies-title', 5: 'dashboard-title', 8: 'vacancy-pool-title', 10: 'prep-title' }[step]);
@@ -78,10 +79,60 @@ document.querySelectorAll('[data-step]').forEach(button => button.addEventListen
 document.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', () => navigate(Number(button.dataset.back))));
 $('diagnosis-start').addEventListener('click', event => {
   event.preventDefault();
-  if (!$('workspace').hidden) { navigate(5); return; }
-  entryStep = 0; workspace.begin();
+  if (workspaceStarted) { resumeWorkspace(); return; }
+  homeRequestedDuringEntry = false; entryStep = 0; workspace.begin();
 });
-$('interview-shortcut').addEventListener('click', () => { entryStep = 10; if (!$('workspace').hidden) showStep(10); else workspace.begin(); });
+$('interview-shortcut').addEventListener('click', () => {
+  if (workspaceStarted) { resumeWorkspace(); if (currentStep !== 10) showStep(10); }
+  else { entryStep = 10; workspace.begin(); }
+});
+function updateSidebar() {
+  document.querySelectorAll('[data-sidebar-step]').forEach(button => {
+    if (workspaceStarted && $('workspace').hidden === false && Number(button.dataset.sidebarStep) === currentStep) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
+  document.querySelector('[data-sidebar-home]').toggleAttribute('aria-current', !workspaceStarted || $('workspace').hidden);
+}
+function closeSidebar() {
+  $('app-sidebar').classList.remove('is-open'); $('sidebar-backdrop').hidden = true;
+  $('sidebar-toggle').setAttribute('aria-expanded', 'false'); $('sidebar-toggle').setAttribute('aria-label', 'Open navigation');
+}
+$('sidebar-toggle').addEventListener('click', () => {
+  const open = !$('app-sidebar').classList.contains('is-open');
+  $('app-sidebar').classList.toggle('is-open', open); $('sidebar-backdrop').hidden = !open;
+  $('sidebar-toggle').setAttribute('aria-expanded', String(open));
+  $('sidebar-toggle').setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  updateDrawerAccessibility(); if (open) $('sidebar-close').focus();
+});
+$('sidebar-close').addEventListener('click', () => { closeSidebar(); $('sidebar-toggle').focus(); });
+$('sidebar-backdrop').addEventListener('click', () => { closeSidebar(); $('sidebar-toggle').focus(); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && $('app-sidebar').classList.contains('is-open')) { closeSidebar(); $('sidebar-toggle').focus(); } });
+document.querySelector('[data-sidebar-home]').addEventListener('click', () => { closeSidebar(); showHome(); });
+document.querySelectorAll('[data-sidebar-step]').forEach(button => button.addEventListener('click', () => {
+  const step = Number(button.dataset.sidebarStep); closeSidebar();
+  if (!workspaceStarted) { homeRequestedDuringEntry = false; pendingSidebarStep = step; entryStep = step === 10 ? 10 : 0; workspace.begin(); return; }
+  resumeWorkspace(); if (step !== currentStep) navigate(step);
+}));
+function resumeWorkspace() {
+  document.querySelector('.hero').hidden = true; $('demo-link').hidden = true; $('workspace').hidden = false;
+  // Reveal the current DOM without reopening tools: reopening can replace unreviewed drafts.
+  const heading = currentStep === 10 && !$('prep-result').hidden ? $('prep-result-title') : document.querySelector(`#step-${currentStep} h2`);
+  updateSidebar(); heading?.focus({ preventScroll: true }); heading?.scrollIntoView({ behavior: 'instant', block: 'start' });
+}
+function showHome() {
+  document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+  $('workspace').hidden = true; $('signup').hidden = true; $('restore-panel').hidden = true; $('backup-restore').hidden = true;
+  document.querySelector('.hero').hidden = false; $('demo-link').hidden = workspaceStarted;
+  $('home-session-note').hidden = !workspaceStarted;
+  $('open-workspace').hidden = workspaceStarted;
+  $('diagnosis-start').textContent = workspaceStarted ? 'Continue my job search →' : 'Find my next step →';
+  homeRequestedDuringEntry = !workspaceStarted; pendingSidebarStep = null; closeSidebar(); updateSidebar();
+  $('hero-title').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' });
+}
+document.querySelectorAll('[data-home]').forEach(link => link.addEventListener('click', event => {
+  if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault(); showHome();
+}));
 function focusDestination() { return state.profile.goal === 'offers' ? 10 : ['interviews', 'applications'].includes(state.profile.goal) ? 4 : 8; }
 document.querySelectorAll('[data-goal]').forEach(button => button.addEventListener('click', () => {
   $('goal').value = button.dataset.goal; syncProfile(); updateProfilePrompt(); setSaveStatus();
@@ -92,7 +143,6 @@ document.querySelectorAll('[data-goal]').forEach(button => button.addEventListen
 profileForm.addEventListener('submit', event => { event.preventDefault(); if (!profileForm.reportValidity()) return; navigate(focusDestination()); });
 preferencesForm.addEventListener('submit', event => { event.preventDefault(); navigate(8); });
 $('plan-home').addEventListener('click', () => navigate(5));
-document.querySelector('.brand').addEventListener('click', event => { if (!$('workspace').hidden) { event.preventDefault(); navigate(5); } });
 $('check-in-update').addEventListener('click', () => {
   if (!state.jobs.length) { navigate(4); return; }
   $('tracker-title').focus({ preventScroll: true }); $('tracker-title').scrollIntoView({ behavior: 'instant', block: 'start' });
@@ -509,10 +559,13 @@ workspace = initWorkspace({
   },
   setState: value => { pendingCvFields.clear(); state = value; fillProfile(); },
   start: ({ restored }) => {
+    workspaceStarted = true;
     document.querySelector('.hero').hidden = true; $('demo-link').hidden = true;
     const complete = state.profile.currentRole.trim() && state.profile.evidence.trim().length >= 20;
     profileReviewed = Boolean(restored && complete);
     showStep(entryStep === 10 ? 10 : restored && (complete || state.jobs.length) ? 5 : restored ? 1 : 0); entryStep = 0;
+    if (homeRequestedDuringEntry) { homeRequestedDuringEntry = false; showHome(); }
+    else if (pendingSidebarStep !== null) { const step = pendingSidebarStep; pendingSidebarStep = null; if (step !== currentStep) navigate(step); }
   }, announce
 });
 interviewPrep = initInterviewPrep({ getState: () => state, changed: setSaveStatus, announce });
@@ -529,3 +582,5 @@ vacancies = initVacancies({
   }
 });
 fillProfile(); showStep(0, false);
+
+updateSidebar();
