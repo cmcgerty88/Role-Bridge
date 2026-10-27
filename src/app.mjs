@@ -1,4 +1,5 @@
 import { initInterviewPrep } from './interview-prep-ui.mjs';
+import { initApplicationPack } from './application-ui.mjs';
 import { searchNextAction, upcomingInterviews } from './search-journey.mjs';
 import { cvProfileDraft } from './cv-profile.mjs';
 import { initVacancies } from './vacancy-ui.mjs';
@@ -16,7 +17,7 @@ const node = (tag, text, className) => { const value = document.createElement(ta
 let state = blankState();
 let profileReviewed = false, entryStep = 0;
 let currentStep = 1, fileGeneration = 0, pendingRemoval = null;
-let workspace, vacancies, interviewPrep, workspaceStarted = false, pendingSidebarStep = null, homeRequestedDuringEntry = false;
+let workspace, vacancies, interviewPrep, applicationPack, workspaceStarted = false, pendingSidebarStep = null, homeRequestedDuringEntry = false;
 // Original field values remain the saved version until the person reviews the import.
 const pendingCvFields = new Map();
 const profileForm = $('profile-form'), preferencesForm = $('preferences-form'), jobForm = $('job-form');
@@ -52,6 +53,7 @@ $('country').addEventListener('change', () => { $('currency').value = $('country
 
 function showStep(step, focus = true) {
   if (step !== 10) interviewPrep?.leave();
+  if (step !== 6) applicationPack?.clearImport();
   currentStep = step;
   document.querySelectorAll('.step-panel').forEach(section => { section.hidden = section.id !== `step-${step}`; });
   document.querySelectorAll('[data-step]').forEach(button => { if (Number(button.dataset.step) === ({ 2: 1, 3: 1, 4: 8 }[step] || step)) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current'); });
@@ -59,12 +61,13 @@ function showStep(step, focus = true) {
   if (step === 4) renderResults();
   if (step === 5) renderDashboard();
   if (step === 10) interviewPrep.open();
+  if (step === 6) applicationPack?.render().catch(() => announce('Could not open the CV builder. Please try again.'));
   if (step === 8) vacancies.open();
   $('tool-menu').open = false;
   updateSidebar();
   document.querySelector('.journey-nav').hidden = step === 0;
   if (focus) {
-    const heading = $({ 0: 'situation-title', 1: 'experience-title', 2: 'preferences-title', 3: 'directions-title', 4: 'vacancies-title', 5: 'dashboard-title', 8: 'vacancy-pool-title', 10: 'prep-title' }[step]);
+    const heading = $({ 0: 'situation-title', 1: 'experience-title', 2: 'preferences-title', 3: 'directions-title', 4: 'vacancies-title', 5: 'dashboard-title', 6: 'pack-title', 8: 'vacancy-pool-title', 10: 'prep-title' }[step]);
     heading.focus({ preventScroll: true }); heading.scrollIntoView({ behavior: 'instant', block: 'start' });
   }
 }
@@ -121,6 +124,8 @@ function resumeWorkspace() {
 }
 function showHome() {
   document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+  applicationPack?.clearImport();
+  applicationPack?.clearImport();
   $('workspace').hidden = true; $('signup').hidden = true; $('restore-panel').hidden = true; $('backup-restore').hidden = true;
   document.querySelector('.hero').hidden = false; $('demo-link').hidden = workspaceStarted;
   $('home-session-note').hidden = !workspaceStarted;
@@ -388,7 +393,7 @@ jobForm.addEventListener('submit', event => {
   if (data.url.trim() && !safeJobUrl(data.url)) { $('job-error').textContent = 'Use a valid HTTPS vacancy link without a username or password in the address.'; $('job-url').focus(); return; }
   if (data.salaryMin !== '' && data.salaryMax !== '' && Number(data.salaryMin) > Number(data.salaryMax)) { $('job-error').textContent = 'The lower salary must not exceed the upper salary.'; $('job-min').focus(); return; }
   const existing = state.jobs.find(job => job.id === data.id);
-  const job = cleanJob({ ...data, source: existing?.source, progress: existing?.progress, id: existing?.id || crypto.randomUUID(), selected: existing?.selected || false, checkedAt: data.status === 'open' ? new Date().toISOString() : '' });
+  const job = cleanJob({ ...data, source: existing?.description === data.description ? existing?.source : null, progress: existing?.progress, id: existing?.id || crypto.randomUUID(), selected: existing?.selected || false, checkedAt: data.status === 'open' ? new Date().toISOString() : '' });
   if (existing) state.jobs[state.jobs.indexOf(existing)] = job; else state.jobs.push(job);
   $('job-dialog').close(); showStep(4); setSaveStatus(); announce('Vacancy saved in this tab and compared with your requirements.');
 });
@@ -448,6 +453,7 @@ function renderResults() {
     const next = node('p', undefined, 'next-action'); next.append(node('strong', 'Next step'), document.createTextNode(result.nextAction)); details.append(next);
     const actions = node('div', undefined, 'job-actions');
     const prepare = node('button', 'Prepare for interview', 'primary'); prepare.type = 'button'; prepare.addEventListener('click', () => { openInterview(job.id); }); actions.append(prepare);
+    const buildCv = node('button', 'Build a CV for this job', 'secondary'); buildCv.type = 'button'; buildCv.addEventListener('click', () => { showStep(6); applicationPack.render(job.id).catch(() => announce('Could not open the CV builder.')); }); actions.append(buildCv);
     if (job.url) { const link = node('a', 'Open original vacancy'); link.href = job.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link); }
     const edit = node('button', 'Edit', 'text-button'); edit.type = 'button'; edit.setAttribute('aria-label', `Edit ${job.title}`); edit.addEventListener('click', () => openJob(job));
     const remove = node('button', 'Remove', 'text-button danger'); remove.type = 'button'; remove.setAttribute('aria-label', `Remove ${job.title}`);
@@ -569,6 +575,8 @@ workspace = initWorkspace({
   }, announce
 });
 interviewPrep = initInterviewPrep({ getState: () => state, changed: setSaveStatus, announce });
+applicationPack = initApplicationPack({ getState: () => state, changed: setSaveStatus, announce,
+  prepareInterview: openInterview, trackJob, editJob: openJob, getCvSource: () => $('cv-text').value });
 vacancies = initVacancies({
   getState: () => state, navigate, prepareJob: openInterview,
   updateSearch: (target, location) => { $('targetRole').value = target; $('locations').value = location; syncProfile(); setSaveStatus(); },

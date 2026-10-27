@@ -48,8 +48,8 @@ test('PDF and Word contain the same plan, samples, evidence, context and user no
   expect(wordText).toContain('go/no-go'); expect(wordText).toContain('Fictional worked example'); expect(wordText).toContain('My personal rehearsal note');
   await writeFile('/tmp/rolebridge-interview-full.pdf', full); await writeFile('/tmp/rolebridge-interview-cheats.pdf', cheats);
 });
-test('CV builder is absent; users can reopen and delete an interview pack without losing its job', async ({ page }) => {
-  await prepare(page); await expect(page.locator('#step-6')).toHaveCount(0); await expect(page.getByRole('button', { name: /Download CV|Create tailored/ })).toHaveCount(0);
+test('optional CV builder stays out of interview prep; users can reopen and delete an interview pack without losing its job', async ({ page }) => {
+  await prepare(page); await expect(page.locator('#step-6')).toBeHidden(); await expect(page.locator('#prep-result')).toBeVisible();
   await page.locator('#plan-home').click(); await page.locator('#application-list').getByRole('button', { name: 'Prepare for interview', exact: true }).click();
   await expect(page.locator('#prep-result')).toBeVisible(); await expect(page.locator('#prep-form')).toBeHidden();
   await page.getByText('Manage this saved preparation', { exact: true }).click(); page.once('dialog', d => d.accept()); await page.locator('#prep-delete').click();

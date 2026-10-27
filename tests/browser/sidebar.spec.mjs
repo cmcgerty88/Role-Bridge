@@ -4,7 +4,7 @@ const nav = (page, step) => page.locator(`[data-sidebar-step="${step}"]`);
 test('desktop left navigation maps to real steps and preserves unsaved inputs', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#app-sidebar')).toBeInViewport();
-  await expect(page.locator('#app-sidebar nav button')).toHaveCount(9);
+  await expect(page.locator('#app-sidebar nav button')).toHaveCount(10);
   await nav(page, 1).click(); await expect(page.locator('#step-1')).toBeVisible();
   await page.locator('#currentRole').fill('Synthetic role');
   await nav(page, 10).click(); await expect(page.locator('#step-10')).toBeVisible();

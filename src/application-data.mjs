@@ -11,6 +11,8 @@ export function cleanCv(v = {}) {
 export function cleanPack(v = {}) {
   v = v && typeof v === 'object' ? v : {};
   return { jobId: text(v.jobId, 80), sourceKey: text(v.sourceKey, 64), summary: text(v.summary, 1800), skills: text(v.skills, 2000), highlights: text(v.highlights, 4000), roleId: text(v.roleId, 80),
+    cvPreferences: { route: ['Direct application', 'Recruiter submission', 'Referral', 'Internal application'].includes(v.cvPreferences?.route) ? v.cvPreferences.route : '', keep: text(v.cvPreferences?.keep, 1000), remove: text(v.cvPreferences?.remove, 1000), newInfo: text(v.cvPreferences?.newInfo, 1500) },
+    letter: { interest: text(v.letter?.interest, 1200), evidence: text(v.letter?.evidence, 2200), manager: text(v.letter?.manager, 120), draft: text(v.letter?.draft, 5000) },
     focus: text(v.focus, 900), prep: v.prep && typeof v.prep === 'object' ? { role: text(v.prep.role, 160), skills: text(v.prep.skills, 2000), evidence: text(v.prep.evidence, 4000) } : null,
     interviewContext: cleanInterviewContext(v.interviewContext), companyResearch: cleanCompanyResearch(v.companyResearch),
     answers: Array.isArray(v.answers) ? v.answers.slice(0, 13).filter(a => a && typeof a.id === 'string').map(a => ({ id: text(a.id, 100), answer: text(a.answer, 1000) })) : [] };
