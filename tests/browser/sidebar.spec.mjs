@@ -37,3 +37,23 @@ test('sidebar does not bypass encrypted workspace unlock', async ({ page }) => {
   await page.locator('#password').fill(password); await page.locator('#create-workspace').click();
   await expect(page.locator('#step-10')).toBeVisible();
 });
+
+test('short screens scroll the page instead of an inner navigation pane', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 500 }); await page.goto('/');
+  await expect(nav(page, 2)).toBeVisible();
+  expect(await page.locator('#app-sidebar').evaluate(el => getComputedStyle(el).overflowY)).not.toBe('auto');
+  await page.evaluate(() => window.scrollTo(0, 250));
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  expect(await page.locator('#app-sidebar').evaluate(el => el.scrollTop)).toBe(0);
+
+  await page.setViewportSize({ width: 390, height: 460 }); await page.goto('/');
+  await page.evaluate(() => window.scrollTo(0, 300));
+  await page.locator('#sidebar-toggle').click();
+  await expect(page.locator('#app-sidebar')).toBeInViewport();
+  expect(await page.locator('#app-sidebar').evaluate(el => getComputedStyle(el).overflowY)).not.toBe('auto');
+  await page.evaluate(() => window.scrollTo(0, 220));
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  expect(await page.locator('#app-sidebar').evaluate(el => el.scrollTop)).toBe(0);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sidebar-toggle')).toHaveAttribute('aria-expanded', 'false');
+});

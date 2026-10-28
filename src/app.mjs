@@ -98,14 +98,16 @@ function updateSidebar() {
 }
 function closeSidebar() {
   $('app-sidebar').classList.remove('is-open'); $('sidebar-backdrop').hidden = true;
+  $('app-sidebar').style.top = '';
   $('sidebar-toggle').setAttribute('aria-expanded', 'false'); $('sidebar-toggle').setAttribute('aria-label', 'Open navigation');
 }
 $('sidebar-toggle').addEventListener('click', () => {
   const open = !$('app-sidebar').classList.contains('is-open');
+  if (open) $('app-sidebar').style.top = `${window.scrollY}px`;
   $('app-sidebar').classList.toggle('is-open', open); $('sidebar-backdrop').hidden = !open;
   $('sidebar-toggle').setAttribute('aria-expanded', String(open));
   $('sidebar-toggle').setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-  updateDrawerAccessibility(); if (open) $('sidebar-close').focus();
+  if (open) $('sidebar-close').focus();
 });
 $('sidebar-close').addEventListener('click', () => { closeSidebar(); $('sidebar-toggle').focus(); });
 $('sidebar-backdrop').addEventListener('click', () => { closeSidebar(); $('sidebar-toggle').focus(); });
