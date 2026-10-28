@@ -11,7 +11,7 @@ With GitHub Pages configured for `main` → `/ (root)`, the app is served at:
 
 https://cmcgerty88.github.io/Role-Bridge/
 
-1. Choose **Find my next step**. New visitors start without an account or password; nothing is saved automatically.
+1. Choose **Find my next role**. New visitors start without an account or password; nothing is saved automatically.
 2. Choose **Find roles that suit me**, **Check my job matches**, or **Prepare for an interview**. The first two routes use a reviewed profile before opening vacancies or saved-job comparisons. Interview preparation opens directly and does not require completing the main profile.
 3. Upload a CV or enter a recent role and work examples manually. Review any extracted role, skills and examples. The app reuses reviewed information; raw CV text is never saved.
 4. Use the desktop left navigation (or **Menu** on a small screen) to move between **Your profile → Find jobs → Interview prep → Applications**. **Home** returns to the landing page in the same tab; **Continue my job search** restores the current step and unreviewed inputs. Optional work preferences and role exploration are under **Preferences & help**.

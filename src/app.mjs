@@ -132,7 +132,7 @@ function showHome() {
   document.querySelector('.hero').hidden = false; $('demo-link').hidden = workspaceStarted;
   $('home-session-note').hidden = !workspaceStarted;
   $('open-workspace').hidden = workspaceStarted;
-  $('diagnosis-start').textContent = workspaceStarted ? 'Continue my job search →' : 'Find my next step →';
+  $('diagnosis-start').textContent = workspaceStarted ? 'Continue my job search →' : 'Find my next role →';
   homeRequestedDuringEntry = !workspaceStarted; pendingSidebarStep = null; closeSidebar(); updateSidebar();
   $('hero-title').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' });
 }
