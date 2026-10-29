@@ -16,7 +16,7 @@ test('next action follows real work: profile, vacancy, application; conflicts ar
   const state = ready(); assert.equal(searchNextAction(state, now).step, 8);
   state.jobs = [job('first'), job('second')];
   assert.equal(searchNextAction(state, now).jobId, 'first');
-  assert.equal(searchNextAction(state, now).step, 10);
+  assert.equal(searchNextAction(state, now).step, 5);
   state.jobs[0].status = 'closed'; assert.equal(searchNextAction(state, now).jobId, 'second');
   state.jobs[1].progress = cleanProgress({ stage: 'rejected', appliedAt: '2026-10-01' });
   assert.equal(searchNextAction(state, now).step, 8);

@@ -454,7 +454,8 @@ function renderResults() {
     details.append(node('p', job.status === 'open' && Number.isFinite(checkedAt) ? `You marked the original page open on ${new Date(checkedAt).toLocaleString()}. This is not an independent check or proof of hiring intent.` : job.status === 'closed' ? 'You marked this vacancy as closed.' : 'The current vacancy status has not been checked.', 'hint'));
     const next = node('p', undefined, 'next-action'); next.append(node('strong', 'Next step'), document.createTextNode(result.nextAction)); details.append(next);
     const actions = node('div', undefined, 'job-actions');
-    const prepare = node('button', 'Prepare for interview', 'primary'); prepare.type = 'button'; prepare.addEventListener('click', () => { openInterview(job.id); }); actions.append(prepare);
+    const continueSearch = node('button', 'See my next step', 'primary'); continueSearch.type = 'button'; continueSearch.addEventListener('click', () => { showStep(5); $('application-list').querySelector(`[data-job-id="${CSS.escape(job.id)}"]`)?.scrollIntoView({ block: 'center' }); }); actions.append(continueSearch);
+    const prepare = node('button', 'Prepare for interview', 'secondary'); prepare.type = 'button'; prepare.addEventListener('click', () => { openInterview(job.id); }); actions.append(prepare);
     const buildCv = node('button', 'Build a CV for this job', 'secondary'); buildCv.type = 'button'; buildCv.addEventListener('click', () => { showStep(6); applicationPack.render(job.id).catch(() => announce('Could not open the CV builder.')); }); actions.append(buildCv);
     if (job.url) { const link = node('a', 'Open original vacancy'); link.href = job.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link); }
     const edit = node('button', 'Edit', 'text-button'); edit.type = 'button'; edit.setAttribute('aria-label', `Edit ${job.title}`); edit.addEventListener('click', () => openJob(job));
@@ -479,7 +480,49 @@ function openInterview(jobId) { showStep(10); interviewPrep.open(jobId); }
 function trackJob(jobId) {
   showStep(5);
   const card = [...$('application-list').children].find(item => item.dataset.jobId === jobId);
-  if (card) { card.querySelector('details').open = true; card.querySelector('[name="stage"]').focus(); }
+  if (card) { card.scrollIntoView({ block: 'center' }); card.querySelector('.quick-outcome select').focus(); }
+}
+
+function quickOutcome(job) {
+  const current = cleanProgress(job.progress), form = node('form', undefined, 'quick-outcome'); form.autocomplete = 'off';
+  const label = node('label', 'What happened with this job?'), select = node('select');
+  select.id = `quick-outcome-${job.id}`; label.htmlFor = select.id;
+  const choices = [['', 'Choose an update'], ['saved', 'Still considering'], ['applied', 'I applied'], ['booked', 'Interview booked'], ['interview', 'Interview completed'], ['rejected', 'I was rejected'], ['offer', 'I received an offer'], ['withdrawn', 'I withdrew']];
+  for (const [value, title] of choices) { const option = node('option', title); option.value = value; select.append(option); }
+  select.value = '';
+  const dateArea = node('div', undefined, 'quick-dates'), appliedLabel = node('label', 'Date applied'), applied = node('input'), eventLabel = node('label'), eventDate = node('input');
+  applied.type = eventDate.type = 'date'; applied.id = `quick-applied-${job.id}`; eventDate.id = `quick-event-${job.id}`;
+  appliedLabel.htmlFor = applied.id; eventLabel.htmlFor = eventDate.id; applied.value = current.appliedAt;
+  const appliedWrap = node('div'), eventWrap = node('div'); appliedWrap.append(appliedLabel, applied); eventWrap.append(eventLabel, eventDate); dateArea.append(appliedWrap, eventWrap);
+  const message = node('p', '', 'error-text'); message.setAttribute('role', 'alert');
+  const save = node('button', 'Save update', 'secondary'); save.type = 'submit';
+  function updateFields() {
+    dateArea.hidden = !select.value || select.value === 'saved';
+    eventWrap.hidden = !['booked', 'interview'].includes(select.value);
+    eventLabel.textContent = select.value === 'booked' ? 'Interview date' : 'Date interview completed';
+    eventDate.value = select.value === 'booked' ? current.scheduledAt : select.value === 'interview' ? current.interviewAt : '';
+    message.textContent = '';
+  }
+  select.addEventListener('change', updateFields); updateFields();
+  form.append(label, select, dateArea, message, save);
+  form.addEventListener('submit', event => {
+    event.preventDefault(); message.textContent = '';
+    if (!select.value) { message.textContent = 'Choose what happened first.'; select.focus(); return; }
+    if (select.value === 'saved' && current.stage !== 'saved') { message.textContent = 'Use More dates and follow-up details to correct an older application.'; return; }
+    const next = cleanProgress({ ...current, stage: select.value === 'booked' ? 'applied' : select.value,
+      appliedAt: select.value === 'saved' ? '' : applied.value,
+      scheduledAt: select.value === 'saved' ? '' : select.value === 'booked' ? eventDate.value : current.scheduledAt,
+      interviewAt: select.value === 'saved' ? '' : select.value === 'interview' ? eventDate.value : current.interviewAt,
+      updatedAt: new Date().toISOString().slice(0, 10) });
+    const error = progressError(next);
+    if (error) { message.textContent = error; return; }
+    if (select.value === 'booked' && !eventDate.value) { message.textContent = 'Add the booked interview date.'; return; }
+    job.progress = next; renderDashboard(); setSaveStatus();
+    const updated = [...$('application-list').children].find(item => item.dataset.jobId === job.id);
+    updated?.querySelector('.quick-outcome select')?.focus();
+    announce('Job update saved. Your next action now uses this outcome.');
+  });
+  return form;
 }
 
 function renderDashboard() {
@@ -487,7 +530,12 @@ function renderDashboard() {
   const next = searchNextAction(state);
   $('search-next-title').textContent = next.title; $('search-next-detail').textContent = next.detail;
   $('search-next-action').textContent = next.action;
-  $('search-next-action').onclick = () => next.step === 10 ? openInterview(next.jobId) : next.jobId ? trackJob(next.jobId) : navigate(next.step);
+  $('search-next-action').onclick = () => {
+    if (next.step === 10) openInterview(next.jobId);
+    else if (next.step === 4) { navigate(4); if (currentStep === 4 && next.jobId) $('job-list').querySelector(`[data-job-id="${CSS.escape(next.jobId)}"]`)?.scrollIntoView({ block: 'center' }); }
+    else if (next.step === 5 && next.jobId) trackJob(next.jobId);
+    else navigate(next.step);
+  };
   $('search-observation').hidden = report.applications < 3;
   const upcoming = upcomingInterviews(state);
   $('upcoming-interviews').hidden = !upcoming.length; $('upcoming-list').replaceChildren();
@@ -512,7 +560,7 @@ function renderDashboard() {
     const actions = node('div', undefined, 'button-row');
     const prepare = node('button', 'Review job match', 'secondary'); prepare.type = 'button'; prepare.addEventListener('click', () => navigate(4));
     const interview = node('button', 'Prepare for interview', 'secondary'); interview.type = 'button'; interview.addEventListener('click', () => openInterview(job.id));
-    actions.append(prepare, interview); card.append(actions);
+    actions.append(prepare, interview); card.append(actions, quickOutcome(job));
     if (p.scheduledAt) card.append(node('p', `Scheduled interview: ${p.scheduledAt}`, 'small'));
     const form = node('form', undefined, 'tracker-form'); form.autocomplete = 'off'; const fields = node('div', undefined, 'field-grid');
     const add = (name, label, type, value) => {
@@ -541,7 +589,7 @@ function renderDashboard() {
     });
     if (p.updatedAt) card.append(node('p', `Last updated ${p.updatedAt}. Edit the fields to correct an entry.`, 'hint'));
     if (p.nextAt && p.nextAt <= new Date().toISOString().slice(0, 10) && !['rejected', 'withdrawn', 'offer'].includes(p.stage)) card.append(node('p', `Next action due: ${p.nextAction || 'Review this application'} (${p.nextAt})`, 'next-action'));
-    const details = node('details'); details.append(node('summary', 'Update this application'), form);
+    const details = node('details'); details.append(node('summary', 'More dates and follow-up details'), form);
     card.append(details); list.append(card);
   }
   $('pilot-useful').value = state.feedback?.useful || ''; $('pilot-return').value = state.feedback?.return || '';

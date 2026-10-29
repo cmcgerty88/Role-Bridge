@@ -27,7 +27,7 @@
       <button type="button" data-sidebar-step="4"><span aria-hidden="true">◫</span> Job match</button>
       <button type="button" data-sidebar-step="6"><span aria-hidden="true">▤</span> CV builder</button>
       <button type="button" data-sidebar-step="10"><span aria-hidden="true">▣</span> Interview prep</button>
-      <button type="button" data-sidebar-step="5"><span aria-hidden="true">◷</span> Applications</button>
+      <button type="button" data-sidebar-step="5"><span aria-hidden="true">◷</span> My job search</button>
       <p class="sidebar-label">More</p>
       <button type="button" data-sidebar-step="3"><span aria-hidden="true">◎</span> Role directions</button>
       <button type="button" data-sidebar-step="2"><span aria-hidden="true">☷</span> Work preferences</button>
@@ -56,8 +56,7 @@
           <ol class="start-steps">
             <li><div><h3>Bring your experience</h3><p>Upload a CV or enter a short profile. Review it once.</p></div></li>
             <li><div><h3>Choose a job</h3><p>Explore vacancies or bring an advert you already have.</p></div></li>
-            <li><div><h3>Prepare for your interview</h3><p>Turn your CV and a job description into a practical interview pack.</p></div></li>
-            <li><div><h3>Track your progress</h3><p>Record responses, plan follow-ups and learn what to try next.</p></div></li>
+            <li><div><h3>See your next move</h3><p>Keep track of saved jobs and responses. Prepare for an interview when you have one.</p></div></li>
           </ol>
         </aside>
         <div class="landing-follow-through">
@@ -90,8 +89,7 @@
       <nav class="journey-nav" aria-label="Your job search journey">
         <button type="button" data-step="1"><span>1</span> Your profile</button>
         <button type="button" data-step="8"><span>2</span> Choose a job</button>
-        <button type="button" data-step="10"><span>3</span> Interview prep</button>
-        <button type="button" data-step="5"><span>4</span> Track progress</button>
+        <button type="button" data-step="5"><span>3</span> My job search</button>
       </nav>
       <section id="step-0" class="step-panel quick-panel" aria-labelledby="situation-title" hidden>
         <p class="eyebrow">Choose your starting point</p><h2 id="situation-title" tabindex="-1">What would help most right now?</h2>
@@ -178,7 +176,7 @@
           <div id="jobsite-links" class="button-row"></div>
           <p class="hint">NIJobs searches Northern Ireland when no location is entered. nijobfinder prefills your role across all job categories; choose your location on its website.</p>
           <p id="jobsite-sharing" class="hint">Search links share the selected role and location when clicked, except nijobfinder which receives only the role. Your CV, experience examples and skill list are not included. The site’s own privacy settings apply.</p>
-          <p class="small">Found something useful? Keep using <button type="button" id="suggestions-add-manual" class="text-button">Add a vacancy</button> to compare it and prepare for an interview.</p>
+          <p class="small">Found something useful? <button type="button" id="suggestions-add-manual" class="text-button">Add a vacancy</button> to check its requirements and see your next move.</p>
         </section>
         <h3 class="pool-heading">Suggested listings inside RoleBridge</h3>
         <p id="vacancy-pool-status" role="status" class="notice"></p>
@@ -186,10 +184,10 @@
         <div id="vacancy-suggestions" class="job-list"></div>
         <button type="button" id="vacancy-more" class="secondary" hidden>Show more suggestions</button>
         <p class="hint">Suggestions are keyword connections, not a fit score or prediction of an interview. The pool covers selected searches and may have no suitable listing for your role or location.</p>
-        <div class="form-bottom"><button type="button" id="vacancies-continue" data-step="10" class="primary">Continue to interview prep <span aria-hidden="true">→</span></button></div>
+        <div class="form-bottom"><button type="button" id="vacancies-continue" data-step="4" class="primary">Review my saved jobs <span aria-hidden="true">→</span></button></div>
       </section>
       <section id="step-4" class="step-panel" aria-labelledby="vacancies-title" hidden>
-        <div class="section-heading"><div><p class="eyebrow">Your saved jobs</p><h2 id="vacancies-title" tabindex="-1">Check your saved jobs</h2><p class="muted">Review the match, then prepare for an interview using the same job description.</p></div><div class="button-row"><button type="button" data-step="8" class="secondary">Find suggested vacancies</button><button type="button" class="secondary" id="add-job">Add a vacancy</button></div></div>
+        <div class="section-heading"><div><p class="eyebrow">Your saved jobs</p><h2 id="vacancies-title" tabindex="-1">Check your saved jobs</h2><p class="muted">Review the match, check any missing requirements, then choose your next move. Interview prep is here when you need it.</p></div><div class="button-row"><button type="button" data-step="8" class="secondary">Find suggested vacancies</button><button type="button" class="secondary" id="add-job">Add a vacancy</button></div></div>
         <div class="notice soft"><strong>Start with one job you’re considering.</strong><p>Choose a suggested vacancy to bring in its available details, or add an advert yourself. Read the full advert before relying on the comparison. Leave missing facts unknown; adding a suggestion does not confirm you meet its requirements.</p></div>
         <div class="results-layout"><aside><details class="card summary"><summary>Your profile & preferences</summary><p class="eyebrow">Your starting point</p><h3 id="summary-name">Your profile</h3><p id="summary-role"></p><ul id="summary-preferences" class="compact-list"></ul><button type="button" class="text-button" data-back="2">Edit work preferences</button><details><summary>Your experience examples</summary><p id="summary-evidence" class="preserve-lines small"></p></details></details><details class="card plan"><summary>Saved directions & action list</summary><p class="eyebrow">One step at a time</p><h3>Your action list</h3><ol id="action-list"></ol></details></aside><div><div id="results-count" class="muted small" role="status" aria-live="polite"></div><div id="job-list" class="job-list"></div></div></div>
       </section>
@@ -205,7 +203,7 @@
         <details class="card pilot-feedback"><summary>Was this useful? (optional feedback)</summary><p class="small muted">Optional feedback stays on this device. Preview a short summary and choose whether to share it with the person running your pilot. Nothing is sent automatically.</p><label for="pilot-useful">Did this give you a useful next action?</label><select id="pilot-useful"><option value="">Choose if you wish</option><option value="yes">Yes</option><option value="partly">Partly</option><option value="no">No</option></select><label for="pilot-return">Would you use this again next week?</label><select id="pilot-return"><option value="">Choose if you wish</option><option value="yes">Yes</option><option value="maybe">Maybe</option><option value="no">No</option></select><button type="button" id="preview-feedback" class="secondary">Preview pilot summary</button><pre id="feedback-preview" hidden></pre></details>
       </section>
       <section id="step-10" class="step-panel" aria-labelledby="prep-title" hidden>
-        <div class="section-heading"><div><p class="eyebrow">Step 3 · Interview preparation</p><h2 id="prep-title" tabindex="-1">Your interview, your preparation.</h2><p class="muted">Bring your CV, the full job description, and anything you know about the company or interview process to create your preparation pack with sample answers, plus pre-interview and interview-day cheat sheets. Download the full pack as PDF or Word.</p></div><button type="button" data-step="5" class="secondary">Back to my job search</button></div>
+        <div class="section-heading"><div><p class="eyebrow">When you have an interview</p><h2 id="prep-title" tabindex="-1">Your interview, your preparation.</h2><p class="muted">Bring your CV, the full job description, and anything you know about the company or interview process to create your preparation pack with sample answers, plus pre-interview and interview-day cheat sheets. Download the full pack as PDF or Word.</p></div><button type="button" data-step="5" class="secondary">Back to my job search</button></div>
         <div class="button-row"><button type="button" id="prep-open-saved" class="secondary" hidden>Open saved interview preparation</button></div>
         <form id="prep-form" autocomplete="off" novalidate>
           <div class="prep-inputs">
@@ -249,7 +247,7 @@
           <section id="prep-practice" class="card" hidden><h3 id="prep-practice-title" tabindex="-1">Practise in your own words</h3><p class="hint">Sample answers are examples, not your history. Notes save only if you have enabled encrypted saving, and appear in both full downloads.</p><div id="prep-questions"></div></section>
           <details class="card"><summary>Manage this saved preparation</summary><button type="button" id="prep-delete" class="text-button danger">Delete interview preparation</button><p class="hint">Removes this job’s reviewed interview evidence and practice notes. The saved job is kept. Any older CV draft for this job is also removed after confirmation.</p></details>
         </section>
-        <div class="form-bottom"><button type="button" id="prep-continue" data-step="5" class="primary">Continue to track progress <span aria-hidden="true">→</span></button></div>
+        <div class="form-bottom"><button type="button" id="prep-continue" data-step="5" class="primary">Back to my job search <span aria-hidden="true">→</span></button></div>
       </section>
       <section id="step-6" class="step-panel" aria-labelledby="pack-title" hidden>
         <div class="section-heading"><div><p class="eyebrow">Optional · CV builder</p><h2 id="pack-title" tabindex="-1">Build a CV for this job</h2><p class="muted">Use your actual career history and the full vacancy to create a focused CV and cover letter. Review every claim before downloading.</p></div><button type="button" data-step="4" class="secondary">Back to job analysis</button></div>

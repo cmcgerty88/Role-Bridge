@@ -21,6 +21,6 @@ export function searchNextAction(state, now = Date.now()) {
     title: 'Start with your experience', detail: 'Upload your CV or enter a short profile, then review the details.', action: 'Complete my profile', step: 1
   };
   const job = state.jobs.find(job => cleanProgress(job.progress).stage === 'saved' && assessJob(state.profile, job, now).status !== 'skip');
-  if (job) return { title: `Prepare for a ${job.title} interview`, detail: 'Use this job description and your CV examples to practise relevant questions and prepare your interview pack.', action: 'Prepare for interview', step: 10, jobId: job.id };
+  if (job) return { title: `Decide your next move for ${job.title}`, detail: 'Check the job match and full advert. When you apply or hear back, record it here. Interview preparation is available whenever you need it.', action: 'Update this job', step: 5, jobId: job.id };
   return { title: 'Find your next suitable job', detail: 'Explore vacancies for your target role, or bring an advert you have already found. Keep recording responses on your saved jobs below.', action: 'Find suitable jobs', step: 8 };
 }
