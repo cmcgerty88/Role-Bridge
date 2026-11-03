@@ -15,6 +15,15 @@ test('CV builder collects a full vacancy and reviewed career details, then downl
   await page.locator('#draft-summary').fill('Release coordinator with experience in calendar planning and change risk reviews.');
   await page.locator('#draft-highlights').fill('Coordinated monthly release calendar and risk reviews.');
   await page.locator('#cv-reviewed').check();
+  await page.locator('#cv-prompt-tool summary').click();
+  await page.locator('#cv-prompt-create').click();
+  await expect(page.locator('#cv-prompt-output')).toHaveValue(/Release Manager/);
+  await expect(page.locator('#cv-prompt-output')).not.toHaveValue(/casey@example\.test|Coordinated monthly release calendar and risk reviews/);
+  await page.locator('#cv-prompt-evidence').check(); await page.locator('#cv-prompt-create').click();
+  await expect(page.locator('#cv-prompt-output')).toHaveValue(/Coordinated monthly release calendar and risk reviews/);
+  await page.locator('#cv-prompt-clear').click(); await expect(page.locator('#cv-prompt-output')).toHaveValue('');
+  await page.setViewportSize({ width: 390, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   for (const ext of ['docx', 'pdf']) {
     const download = page.waitForEvent('download'); await page.locator(`#download-cv-${ext}`).click();
     expect((await download).suggestedFilename()).toMatch(new RegExp(`\\.${ext}$`));

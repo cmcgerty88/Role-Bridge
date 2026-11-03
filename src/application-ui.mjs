@@ -11,6 +11,7 @@ import { cleanJob } from './model.mjs';
 import { cleanCompanyResearch } from './company-research.mjs';
 import { letterDraft, letterBlocks, letterWordCount } from './cover-letter.mjs';
 import { readCv } from './cv.mjs';
+import { cvPrompt } from './prompt-tools.mjs';
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => { const el = document.createElement(tag); if (text !== undefined) el.textContent = text; if (className) el.className = className; return el; };
 export function initApplicationPack({ getState, changed, announce, prepareInterview, trackJob, editJob, getCvSource }) {
@@ -29,6 +30,18 @@ export function initApplicationPack({ getState, changed, announce, prepareInterv
       invalidateReview(); changed(); renderPreview();
     }
   });
+  function clearPrompt() { $('cv-prompt-output').value = ''; $('cv-prompt-evidence').checked = false; $('cv-prompt-status').textContent = ''; }
+  $('cv-prompt-create').addEventListener('click', () => {
+    const job = getJob(), pack = getPack(); if (!job || !pack) return;
+    $('cv-prompt-output').value = cvPrompt({ job, cv: getState().cv, pack, includeEvidence: $('cv-prompt-evidence').checked });
+    $('cv-prompt-status').textContent = 'Prompt ready to review. Nothing has been sent or copied.';
+  });
+  $('cv-prompt-copy').addEventListener('click', async () => {
+    const output = $('cv-prompt-output'); if (!output.value.trim()) { $('cv-prompt-status').textContent = 'Build or write a prompt first.'; return; }
+    try { await navigator.clipboard.writeText(output.value); $('cv-prompt-status').textContent = 'Copied. Review the destination service’s privacy terms before pasting.'; }
+    catch { output.focus(); output.select(); $('cv-prompt-status').textContent = 'Automatic copying is unavailable. The prompt is selected; use your browser’s Copy action.'; }
+  });
+  $('cv-prompt-clear').addEventListener('click', clearPrompt);
   $('pack-track').addEventListener('click', () => trackJob(selectedId));
   $('interview-context-open').addEventListener('click', () => prepareInterview(selectedId));
   const option = (value, label) => { const el = node('option', label); el.value = value; return el; };
@@ -77,7 +90,7 @@ export function initApplicationPack({ getState, changed, announce, prepareInterv
     });
   }
   async function render(jobId) {
-    cvImport.clear();
+    cvImport.clear(); clearPrompt();
     const state = getState(), token = ++generation;
     if (!state.jobs.length) $('pack-new-job-panel').open = true;
     selectedId = state.jobs.some(j => j.id === jobId) ? jobId : state.jobs.some(j => j.id === selectedId) ? selectedId : state.jobs[0]?.id || '';
@@ -247,5 +260,5 @@ export function initApplicationPack({ getState, changed, announce, prepareInterv
     finally { exports.forEach(id => { $(id).disabled = false; }); }
   }
   for (const id of exports) { const [, kind, format] = id.split('-'); $(id).addEventListener('click', () => exportFile(kind, format)); }
-  return { render, clearImport: cvImport.clear };
+  return { render, clearImport() { cvImport.clear(); clearPrompt(); } };
 }
