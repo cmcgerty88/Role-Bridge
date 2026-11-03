@@ -126,6 +126,7 @@ function resumeWorkspace() {
 }
 function showHome() {
   document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+  interviewPrep?.leave();
   applicationPack?.clearImport();
   applicationPack?.clearImport();
   $('workspace').hidden = true; $('signup').hidden = true; $('restore-panel').hidden = true; $('backup-restore').hidden = true;

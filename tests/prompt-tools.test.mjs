@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cvPrompt } from '../src/prompt-tools.mjs';
+import { cvPrompt, interviewPrompt } from '../src/prompt-tools.mjs';
 
 test('CV prompt uses the saved vacancy and excludes candidate details by default', () => {
   const input = { job: { title: 'Release Manager', employer: 'Example Ltd', description: 'Coordinate releases and manage risk.' },
@@ -13,4 +13,15 @@ test('CV prompt uses the saved vacancy and excludes candidate details by default
   const included = cvPrompt({ ...input, includeEvidence: true });
   assert.match(included, /PRIVATE_HISTORY|PRIVATE_SUMMARY/);
   assert.doesNotMatch(included, /PRIVATE_NAME|PRIVATE_EMAIL/);
+});
+
+test('interview prompt uses the supplied stage and advert, but requires explicit CV inclusion', () => {
+  const input = { company: 'Example Ltd', url: 'https://example.com/', role: 'Release Manager', description: 'Manage production releases.', stage: 'Hiring manager', format: 'Video',
+    location: 'Belfast, UK', salary: '£50,000–£60,000', concern: 'Technical depth', reviewedEvidence: 'PRIVATE_STORY', cvText: 'PRIVATE_FULL_CV' };
+  const safe = interviewPrompt(input);
+  assert.match(safe, /Hiring manager/); assert.match(safe, /Belfast, UK/); assert.match(safe, /two A4 pages/);
+  assert.doesNotMatch(safe, /PRIVATE_STORY|PRIVATE_FULL_CV/);
+  assert.match(interviewPrompt({ ...input, includeEvidence: true }), /PRIVATE_FULL_CV/);
+  assert.doesNotMatch(interviewPrompt({ ...input, includeEvidence: true }), /PRIVATE_STORY/);
+  assert.match(interviewPrompt({}), /Ask me for the official company URL/);
 });

@@ -9,12 +9,43 @@ import { cleanInterviewContext } from './interview-context.mjs';
 import { interviewBlocks, plainText, suggestedRole } from './application-content.mjs';
 import { preInterviewSheetBlocks, interviewDaySheetBlocks, interviewEvidence, suggestedRequirements } from './interview-prep-content.mjs';
 import { makePdf, makeDocx, makeCheatSheetsPdf, downloadDocument } from './document-export.mjs';
+import { interviewPrompt } from './prompt-tools.mjs';
 const $ = id => document.getElementById(id);
 const node = (tag, text) => { const el = document.createElement(tag); el.textContent = text; return el; };
 
 export function initInterviewPrep({ getState, changed, announce }) {
   let initialized = false, resultId = '', revision = 0, fileRevision = 0;
   const form = $('prep-form'); form.reset();
+  const agentFields = ['prep-agent-stage', 'prep-agent-format', 'prep-agent-duration', 'prep-agent-location', 'prep-agent-salary', 'prep-agent-concern', 'prep-agent-cv', 'prep-agent-output'];
+  function clearAgent() {
+    for (const id of agentFields) $(id).value = '';
+    $('prep-agent-include-cv').checked = false; $('prep-agent-status').textContent = '';
+  }
+  function invalidateAgentPrompt() { $('prep-agent-output').value = ''; $('prep-agent-status').textContent = 'Inputs changed. Build the prompt again before copying.'; }
+  clearAgent();
+  for (const id of [...agentFields.filter(id => id !== 'prep-agent-output'), 'prep-agent-include-cv', 'prep-employer', 'prep-job-title', 'prep-company-url', 'prep-description', 'prep-role', 'prep-skills', 'prep-evidence', 'prep-company', 'prep-company-research', 'prep-process']) {
+    $(id).addEventListener('input', invalidateAgentPrompt);
+    $(id).addEventListener('change', invalidateAgentPrompt);
+  }
+  $('prep-agent-clear').addEventListener('click', clearAgent);
+  $('prep-agent-open').addEventListener('click', () => { $('prep-agent-tool').open = true; $('prep-agent-tool').scrollIntoView({ block: 'start' }); $('prep-agent-tool').querySelector('summary').focus(); });
+  $('prep-agent-create').addEventListener('click', () => {
+    const url = $('prep-company-url').value.trim();
+    if (url && !safeCompanyUrl(url)) { $('prep-agent-status').textContent = 'Check the company URL. Use a public HTTPS address without login or tracking details.'; return; }
+    const reviewedEvidence = [$('prep-role').value, $('prep-skills').value, $('prep-evidence').value].filter(Boolean).join('\n');
+    $('prep-agent-output').value = interviewPrompt({ company: $('prep-employer').value, url, role: $('prep-job-title').value,
+      description: $('prep-description').value, stage: $('prep-agent-stage').value, format: $('prep-agent-format').value,
+      duration: $('prep-agent-duration').value, location: $('prep-agent-location').value || getState().profile.locations,
+      salary: $('prep-agent-salary').value, concern: $('prep-agent-concern').value,
+      companyNotes: [$('prep-company-research').value, $('prep-company').value].filter(Boolean).join('\n'), processNotes: $('prep-process').value,
+      cvText: $('prep-agent-cv').value, reviewedEvidence, includeEvidence: $('prep-agent-include-cv').checked });
+    $('prep-agent-status').textContent = 'Prompt ready to review. Missing required details are marked for the agent to ask about. Nothing has been sent or copied.';
+  });
+  $('prep-agent-copy').addEventListener('click', async () => {
+    const output = $('prep-agent-output'); if (!output.value.trim()) { $('prep-agent-status').textContent = 'Build or write a prompt first.'; return; }
+    try { await navigator.clipboard.writeText(output.value); $('prep-agent-status').textContent = 'Copied. Check the destination service’s privacy terms before pasting.'; }
+    catch { output.focus(); output.select(); $('prep-agent-status').textContent = 'Automatic copying is unavailable. The prompt is selected; use your browser’s Copy action.'; }
+  });
   const fields = ['prep-role', 'prep-skills', 'prep-evidence', 'prep-job-title', 'prep-employer', 'prep-description', 'prep-focus', 'prep-company', 'prep-process', 'prep-company-url', 'prep-company-research'];
   function invalidate() {
     revision++; $('prep-practice').hidden = true; $('prep-questions').replaceChildren(); $('prep-reviewed').checked = false; $('prep-result').hidden = true;
@@ -33,6 +64,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
   function showContextFields() { $('prep-context-fields').hidden = $('prep-context-status').value !== 'provided'; }
   $('prep-context-status').addEventListener('change', () => { invalidate(); showContextFields(); });
   function fillEvidence(source) {
+    invalidateAgentPrompt();
     $('prep-role').value = source.role || '';
     $('prep-skills').value = source.skills || '';
     // Keep whole statements within the reviewed snapshot limit.
@@ -49,7 +81,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
   }
   $('prep-use-profile').addEventListener('click', useProfile);
   function chooseJob(reuseEvidence = false) {
-    invalidate(); const state = getState(), job = state.jobs.find(j => j.id === $('prep-job').value);
+    invalidate(); invalidateAgentPrompt(); const state = getState(), job = state.jobs.find(j => j.id === $('prep-job').value);
     for (const [id, key] of [['prep-job-title', 'title'], ['prep-employer', 'employer'], ['prep-description', 'description']]) {
       $(id).value = job?.[key] || ''; $(id).readOnly = Boolean(job) && key !== 'description';
     }
@@ -198,5 +230,5 @@ export function initInterviewPrep({ getState, changed, announce }) {
     finally { downloads.forEach(id => $(id).disabled = false); }
   }
   downloads.forEach((id, index) => $(id).addEventListener('click', () => exportFile(['full', 'cheat', 'text', 'word'][index])));
-  return { open, leave() { fileRevision++; revision++; $('prep-cv-file').value = ''; $('prep-cv-file').disabled = false; $('prep-create').disabled = false; } };
+  return { open, leave() { fileRevision++; revision++; $('prep-cv-file').value = ''; $('prep-cv-file').disabled = false; $('prep-create').disabled = false; clearAgent(); } };
 }

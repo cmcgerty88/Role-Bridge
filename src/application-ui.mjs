@@ -27,10 +27,14 @@ export function initApplicationPack({ getState, changed, announce, prepareInterv
       Object.assign(pack, cleanPack({ ...pack, ...values.pack }));
       for (const [field, value] of Object.entries(values.cv)) baseForm.elements.namedItem(field).value = value;
       for (const [field, value] of Object.entries(values.pack)) draftForm.elements.namedItem(field).value = value;
-      invalidateReview(); changed(); renderPreview();
+      invalidateReview(); invalidatePrompt(); changed(); renderPreview();
     }
   });
   function clearPrompt() { $('cv-prompt-output').value = ''; $('cv-prompt-evidence').checked = false; $('cv-prompt-status').textContent = ''; }
+  function invalidatePrompt() { $('cv-prompt-output').value = ''; $('cv-prompt-status').textContent = 'Inputs changed. Build the prompt again before copying.'; }
+  $('cv-prompt-evidence').addEventListener('change', invalidatePrompt);
+  for (const form of [baseForm, draftForm]) form.addEventListener('input', invalidatePrompt);
+  for (const id of ['cv-application-route', 'cv-keep', 'cv-remove', 'cv-new', 'cv-company-url', 'cv-company-notes', 'letter-interest', 'letter-manager']) $(id).addEventListener('input', invalidatePrompt);
   $('cv-prompt-create').addEventListener('click', () => {
     const job = getJob(), pack = getPack(); if (!job || !pack) return;
     $('cv-prompt-output').value = cvPrompt({ job, cv: getState().cv, pack, includeEvidence: $('cv-prompt-evidence').checked });

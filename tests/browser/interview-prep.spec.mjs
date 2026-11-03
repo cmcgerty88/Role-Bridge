@@ -60,6 +60,7 @@ test('uploaded CV and pasted advert produce a tailored printable pack and two-pa
   await begin(page); await page.locator('#prep-create').click(); await expect(page.locator('#prep-result')).toBeHidden();
   await source(page); await page.locator('#prep-create').click(); await expect(page.locator('#prep-reviewed')).not.toBeChecked(); await expect(page.locator('#prep-result')).toBeHidden();
   await create(page);
+  await page.locator('#prep-agent-open').click(); await expect(page.locator('#prep-agent-tool')).toHaveAttribute('open', '');
   const full = await download(page, 'prep-download-full'), sheet = await download(page, 'prep-download-cheat');
   expect(full.name).toBe('rolebridge-interview-release-manager.pdf'); expect(sheet.name).toBe('rolebridge-interview-cheat-sheet-release-manager.pdf');
   const fullPdf = await pdfInfo(page, full.bytes), shortPdf = await pdfInfo(page, sheet.bytes, true);

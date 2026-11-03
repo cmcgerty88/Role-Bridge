@@ -21,6 +21,7 @@ test('CV builder collects a full vacancy and reviewed career details, then downl
   await expect(page.locator('#cv-prompt-output')).not.toHaveValue(/casey@example\.test|Coordinated monthly release calendar and risk reviews/);
   await page.locator('#cv-prompt-evidence').check(); await page.locator('#cv-prompt-create').click();
   await expect(page.locator('#cv-prompt-output')).toHaveValue(/Coordinated monthly release calendar and risk reviews/);
+  await page.locator('#cv-prompt-evidence').uncheck(); await expect(page.locator('#cv-prompt-output')).toHaveValue('');
   await page.locator('#cv-prompt-clear').click(); await expect(page.locator('#cv-prompt-output')).toHaveValue('');
   await page.setViewportSize({ width: 390, height: 740 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
