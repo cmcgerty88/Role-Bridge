@@ -10,6 +10,7 @@ import { initWorkspace } from './workspace.mjs';
 import { diagnose, STAGES, GOALS, cleanProgress, progressError } from './progress.mjs';
 import { assessJob } from './matching.mjs';
 import { readCv } from './cv.mjs';
+import { setCvUploadStatus } from './cv-upload-status.mjs';
 import { ROLE_CATALOGUE, exploreRoles, matchRole, roleById, prepareSearchTerms } from './roles.mjs';
 
 const $ = id => document.getElementById(id);
@@ -345,9 +346,9 @@ function showWorkSuggestions() {
   select.addEventListener('change', render); container.append(label, select, preview, status); render();
 }
 $('find-work-examples').addEventListener('click', showWorkSuggestions);
-$('clear-cv').addEventListener('click', () => { fileGeneration++; $('cv-text').value = ''; $('cv-file').value = ''; $('cv-text').disabled = false; $('cv-file').disabled = false; $('skill-chips').replaceChildren(); $('skill-suggestions').hidden = true; clearWorkSuggestions(); $('cv-status').textContent = 'Raw CV cleared. Your reviewed profile is unchanged.'; });
+$('clear-cv').addEventListener('click', () => { fileGeneration++; $('cv-text').value = ''; $('cv-file').value = ''; $('cv-text').disabled = false; $('cv-file').disabled = false; $('skill-chips').replaceChildren(); $('skill-suggestions').hidden = true; clearWorkSuggestions(); setCvUploadStatus($('cv-status'), '', 'Raw CV cleared. Your reviewed profile is unchanged.'); });
 $('find-skills').addEventListener('click', showSkillSuggestions);
-$('cv-text').addEventListener('input', () => { $('skill-suggestions').hidden = true; clearWorkSuggestions(); $('cv-status').textContent = 'CV text is held only in this tab. Review it and add relevant examples to your profile.'; });
+$('cv-text').addEventListener('input', () => { $('skill-suggestions').hidden = true; clearWorkSuggestions(); setCvUploadStatus($('cv-status'), '', 'CV text is held only in this tab. Review it and add relevant examples to your profile.'); });
 $('use-selection').addEventListener('click', () => {
   const input = $('cv-text'); const selected = input.value.slice(input.selectionStart, input.selectionEnd).trim();
   if (!selected) { $('cv-status').textContent = 'First highlight a passage in the CV-text box, then choose “Add selected text to my examples”.'; input.focus(); return; }
@@ -360,15 +361,15 @@ $('cv-file').addEventListener('change', async () => {
   const generation = ++fileGeneration;
   clearWorkSuggestions();
   $('cv-file').disabled = true; $('cv-text').disabled = true;
-  $('cv-status').textContent = 'Reading your CV on this device…'; $('cv-status').classList.remove('error-text');
+  setCvUploadStatus($('cv-status'), 'loading', 'Reading your CV on this device…'); $('cv-status').classList.remove('error-text');
   try {
     const text = await readCv(file); if (generation !== fileGeneration) return;
     $('cv-text').value = text;
     fillFromCv();
-    $('cv-status').textContent = `Read ${file.name} in your browser. ` + $('cv-status').textContent;
+    setCvUploadStatus($('cv-status'), 'success', `Read ${file.name} in your browser. ` + $('cv-status').textContent);
   } catch (error) {
     if (generation !== fileGeneration) return;
-    $('cv-status').textContent = error.message || 'The file could not be read. Please paste your CV text instead.';
+    setCvUploadStatus($('cv-status'), 'error', error.message || 'The file could not be read. Please paste your CV text instead.');
     $('cv-status').classList.add('error-text');
   } finally {
     if (generation === fileGeneration) { $('cv-file').disabled = false; $('cv-text').disabled = false; $('cv-file').value = ''; }

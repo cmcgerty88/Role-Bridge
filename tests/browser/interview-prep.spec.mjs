@@ -24,6 +24,7 @@ async function begin(page, encrypted = false) {
 async function source(page) {
   await page.locator('#prep-cv-file').setInputFiles({ name: 'synthetic.txt', mimeType: 'text/plain', buffer: Buffer.from(cv) });
   await expect(page.locator('#prep-role')).toHaveValue('Release Manager');
+  await expect(page.locator('#prep-upload-status')).toHaveAttribute('data-upload-state', 'success');
   await page.locator('#prep-job-title').fill('Release Manager'); await page.locator('#prep-employer').fill('Synthetic Target Employer');
   await page.locator('#prep-description').fill(description); await page.locator('#prep-find-focus').click();
 }

@@ -109,9 +109,11 @@ test('DOCX reader extracts plain text and error cases have a usable fallback', a
   await begin(page);
   await page.locator('#cv-file').setInputFiles(fileURLToPath(new URL('../fixtures/synthetic-cv.docx', import.meta.url)));
   await expect(page.locator('#cv-status')).toContainText('Read synthetic-cv.docx');
+  await expect(page.locator('#cv-status')).toHaveAttribute('data-upload-state', 'success');
   await expect(page.locator('#cv-text')).toHaveValue(/Synthetic candidate/);
   await page.locator('#cv-file').setInputFiles({ name: 'old-cv.doc', mimeType: 'application/msword', buffer: Buffer.from('Synthetic older document') });
   await expect(page.locator('#cv-status')).toContainText('exported as DOCX');
+  await expect(page.locator('#cv-status')).toHaveAttribute('data-upload-state', 'error');
   await page.locator('#cv-file').setInputFiles({ name: 'too-large.txt', mimeType: 'text/plain', buffer: Buffer.alloc(5 * 1024 * 1024 + 1, 'a') });
   await expect(page.locator('#cv-status')).toContainText('smaller than 5 MB');
   await expect(page.locator('#cv-text')).toBeEnabled();

@@ -50,6 +50,7 @@ test('uploaded master CV is previewed locally and only chosen details enter the 
   await page.locator('#pack-new-job button[type="submit"]').click(); await page.locator('#pack-create').click();
   await page.locator('#application-cv-file').setInputFiles({ name: 'master.txt', mimeType: 'text/plain', buffer: Buffer.from('Alex Example\nalex@example.test\nProfessional summary\nRelease manager coordinating production changes.\nWork experience\nRelease Manager | Example employer | Jan 2023 - Present\nCoordinated releases across four teams.\nReferences\nREFEREE_SECRET') });
   await expect(page.locator('#application-cv-review')).toBeVisible();
+  await expect(page.locator('#application-cv-status')).toHaveAttribute('data-upload-state', 'success');
   await expect(page.locator('#application-cv-fields')).not.toContainText('REFEREE_SECRET');
   await expect(page.locator('#cv-fullName')).toHaveValue('');
   await page.locator('[data-import-field="fullName"]').check();

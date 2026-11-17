@@ -25,6 +25,7 @@ test('CV first journey needs only review; later uploads preserve edits and targe
   await expect(page.locator('#cv-file')).toBeVisible();
   await expect(page.locator('#cv-text')).toBeHidden();
   await upload(page);
+  await expect(page.locator('#cv-status')).toHaveAttribute('data-upload-state', 'success');
   await expect(page.locator('#currentRole')).toHaveValue('Release Manager');
   await expect(page.locator('#skills')).toHaveValue(/ITIL/);
   await expect(page.locator('#evidence')).toHaveValue(/Created rollback plans/);

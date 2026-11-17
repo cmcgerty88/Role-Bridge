@@ -2,6 +2,7 @@ import { cleanCompanyResearch, safeCompanyUrl, hasCompanyResearch } from './comp
 import { interviewQuestions } from './interviews.mjs';
 import { sampleAnswer } from './interview-answers.mjs';
 import { readCv } from './cv.mjs';
+import { setCvUploadStatus } from './cv-upload-status.mjs';
 import { cvProfileDraft } from './cv-profile.mjs';
 import { cleanJob } from './model.mjs';
 import { cleanPack } from './application-data.mjs';
@@ -77,7 +78,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
   function useProfile() {
     invalidate(); const profile = getState().profile;
     fillEvidence({ role: profile.currentRole, skills: profile.skills, evidence: profile.evidence });
-    $('prep-upload-status').textContent = profile.evidence ? 'Using your workspace experience. Review it against the CV you submitted for this role; add any missing examples.' : 'Upload a CV or enter your recent role and relevant work examples below.';
+    setCvUploadStatus($('prep-upload-status'), '', profile.evidence ? 'Using your workspace experience. Review it against the CV you submitted for this role; add any missing examples.' : 'Upload a CV or enter your recent role and relevant work examples below.');
   }
   $('prep-use-profile').addEventListener('click', useProfile);
   function chooseJob(reuseEvidence = false) {
@@ -98,7 +99,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
       : job ? 'Using the saved description. You can update it below; changes save only when you review and create the pack.' : 'Paste the advert for the role you are interviewing for. Creating the pack will also add this vacancy to your shortlist.';
     if (pack && reuseEvidence) {
       fillEvidence(interviewEvidence(pack));
-      $('prep-upload-status').textContent = 'Using the reviewed evidence from this vacancy’s existing pack. You can upload a different CV or use your workspace experience instead.';
+      setCvUploadStatus($('prep-upload-status'), '', 'Using the reviewed evidence from this vacancy’s existing pack. You can upload a different CV or use your workspace experience instead.');
     }
   }
   function open(jobId) {
@@ -128,14 +129,14 @@ export function initInterviewPrep({ getState, changed, announce }) {
     const file = $('prep-cv-file').files[0]; if (!file) return;
     const token = ++fileRevision; invalidate();
     $('prep-cv-file').disabled = true; $('prep-create').disabled = true;
-    $('prep-upload-status').textContent = 'Reading your CV on this device…';
+    setCvUploadStatus($('prep-upload-status'), 'loading', 'Reading your CV on this device…');
     try {
       const source = await readCv(file); if (token !== fileRevision) return;
       const draft = cvProfileDraft(source);
       fillEvidence({ role: draft.currentRole, skills: draft.skills, evidence: draft.evidence });
       invalidate();
-      $('prep-upload-status').textContent = 'CV read locally. Review the role, recognised skills and up to three latest-role examples below. Complete any gaps; the reader cannot recognise every layout. The raw text is not retained here.';
-    } catch (error) { if (token !== fileRevision) return; $('prep-upload-status').textContent = error.message || 'Could not read this CV. Try another file or enter relevant examples below.'; }
+      setCvUploadStatus($('prep-upload-status'), 'success', 'CV read locally. Review the role, recognised skills and up to three latest-role examples below. Complete any gaps; the reader cannot recognise every layout. The raw text is not retained here.');
+    } catch (error) { if (token !== fileRevision) return; setCvUploadStatus($('prep-upload-status'), 'error', error.message || 'Could not read this CV. Try another file or enter relevant examples below.'); }
     finally { if (token === fileRevision) { $('prep-cv-file').value = ''; $('prep-cv-file').disabled = false; $('prep-create').disabled = false; } }
   });
   function showResult(job, pack) {
@@ -199,7 +200,7 @@ export function initInterviewPrep({ getState, changed, announce }) {
     if (!pack || !confirm('Delete the interview evidence, company website research, notes and practice answers for this job?' + (pack.sourceKey ? ' This also deletes the older CV draft stored with this job; keep an encrypted backup if needed.' : '') + ' Downloaded documents must be deleted separately.')) return;
     state.packs = state.packs.filter(p => p !== pack);
     changed(); resultId = ''; invalidate(); form.hidden = false; chooseJob(true); fillEvidence({});
-    $('prep-upload-status').textContent = 'Preparation deleted. Upload a CV, reuse your profile or enter examples to start again.';
+    setCvUploadStatus($('prep-upload-status'), '', 'Preparation deleted. Upload a CV, reuse your profile or enter examples to start again.');
   });
   function renderPractice(job, pack) {
     const list = $('prep-questions'); list.replaceChildren();

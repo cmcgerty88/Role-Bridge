@@ -1,5 +1,6 @@
 import { applicationCvDraft, CV_IMPORT_FIELDS } from './cv-application.mjs';
 import { readCv } from './cv.mjs';
+import { setCvUploadStatus } from './cv-upload-status.mjs';
 const $ = id => document.getElementById(id);
 const node = (tag, text) => { const el = document.createElement(tag); if (text !== undefined) el.textContent = text; return el; };
 export function initApplicationCvImport({ getState, getPack, getSource, apply }) {
@@ -9,7 +10,7 @@ export function initApplicationCvImport({ getState, getPack, getSource, apply })
     generation++; sourcePack = null; original.clear();
     $('application-cv-file').value = ''; $('application-cv-review').hidden = true;
     $('application-cv-fields').replaceChildren(); $('application-cv-confirmed').checked = false;
-    $('application-cv-status').textContent = ''; $('application-cv-error').textContent = '';
+    setCvUploadStatus($('application-cv-status'), '', ''); $('application-cv-error').textContent = '';
   }
   function preview(source) {
     const pack = getPack(); if (!pack) return;
@@ -39,12 +40,13 @@ export function initApplicationCvImport({ getState, getPack, getSource, apply })
   }
   $('application-cv-file').addEventListener('change', async () => {
     const file = $('application-cv-file').files[0]; clear(); if (!file) return;
-    const token = generation, pack = getPack(); $('application-cv-status').textContent = 'Reading your CV on this device…';
+    const token = generation, pack = getPack(); setCvUploadStatus($('application-cv-status'), 'loading', 'Reading your CV on this device…');
     try {
       const source = await readCv(file);
       if (token !== generation || getPack() !== pack) return;
       preview(source);
-    } catch (error) { if (token === generation) $('application-cv-status').textContent = error.message || 'Could not read this CV. You can still enter details manually.'; }
+      setCvUploadStatus($('application-cv-status'), 'success', `CV read locally. ${$('application-cv-status').textContent}`);
+    } catch (error) { if (token === generation) setCvUploadStatus($('application-cv-status'), 'error', error.message || 'Could not read this CV. You can still enter details manually.'); }
   });
   $('application-cv-reuse').addEventListener('click', () => {
     clear(); const source = getSource();

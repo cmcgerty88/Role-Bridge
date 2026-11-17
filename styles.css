@@ -31,6 +31,16 @@
 #prep-form{max-width:820px;margin:0 auto}.prep-inputs{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start}.prep-confirm{margin:24px 0;max-width:820px}.prep-confirm .check{margin-top:0}.prep-confirm .hint{margin-top:16px;margin-bottom:0}.prep-downloads{margin-bottom:24px}.prep-sheet{max-width:700px;margin:24px auto;background:white;border:1px solid var(--line);padding:30px;overflow-wrap:anywhere}.prep-sheet p{font-size:13px}.prep-sheet h4{margin-top:16px}.prep-lines{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}.prep-lines-1{-webkit-line-clamp:1}.prep-lines-2{-webkit-line-clamp:2}.prep-lines-3{-webkit-line-clamp:3}#prep-cv-file{max-width:100%}#prep-form input[readonly],#prep-form textarea[readonly]{background:#f4f6f1}#prep-result{max-width:950px;margin:auto}@media(max-width:800px){.prep-sheet{padding:20px}.prep-downloads .button-row{align-items:stretch;flex-direction:column}}
 
 .prep-inputs>.card{min-width:0}
+.cv-upload-feedback[data-upload-state]{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:9px;margin-top:12px;line-height:1.5}
+.cv-upload-feedback[data-upload-state]::before{content:'';display:block;flex:none;width:19px;height:19px;margin-top:1px}
+.cv-upload-feedback[data-upload-state=loading]{background:#eef3f0;color:var(--ink)}
+.cv-upload-feedback[data-upload-state=loading]::before{border:3px solid #b9d1c3;border-top-color:var(--green);border-radius:50%;animation:cv-upload-spin .8s linear infinite}
+.cv-upload-feedback[data-upload-state=success]{background:var(--pale);color:var(--green);font-weight:600}
+.cv-upload-feedback[data-upload-state=success]::before{content:'✓';background:var(--green);color:white;border-radius:50%;font-size:14px;line-height:19px;text-align:center;font-weight:700}
+.cv-upload-feedback[data-upload-state=error]{background:#fbece9;color:var(--error)}
+.cv-upload-feedback[data-upload-state=error]::before{content:'!';border:1px solid currentColor;border-radius:50%;font-size:13px;line-height:17px;text-align:center;font-weight:700}
+@keyframes cv-upload-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.cv-upload-feedback[data-upload-state=loading]::before{animation:none}}
 .prep-context{margin-top:24px;max-width:820px}.prep-context select{max-width:520px}
 
 /* A single visible journey; secondary controls stay behind disclosures. */
