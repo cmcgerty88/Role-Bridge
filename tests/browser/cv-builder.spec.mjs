@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
+
 test('CV builder collects a full vacancy and reviewed career details, then downloads four editable/shareable files', async ({ page }) => {
   const pageErrors = []; page.on('pageerror', error => pageErrors.push(error.message));
   await page.goto('/'); await page.locator('[data-sidebar-step="6"]').click();

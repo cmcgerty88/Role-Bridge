@@ -25,9 +25,10 @@ test('nearest valid upcoming interview is prioritised without counting it as com
   const state = ready();
   state.jobs = [job('later', { stage: 'applied', appliedAt: '2026-10-01', scheduledAt: '2026-10-28' }), job('sooner', { stage: 'applied', appliedAt: '2026-10-01', scheduledAt: '2026-10-23' }), job('invalid', { scheduledAt: '2026-10-22' }), job('rejected', { stage: 'rejected', appliedAt: '2026-10-01', scheduledAt: '2026-10-22' })];
   assert.deepEqual(upcomingInterviews(state, now).map(j => j.id), ['sooner', 'later']);
-  assert.equal(searchNextAction(state, now).jobId, 'sooner'); assert.equal(searchNextAction(state, now).step, 10);
+  assert.equal(searchNextAction(state, now).jobId, 'sooner'); assert.equal(searchNextAction(state, now).step, 5);
+  assert.equal(searchNextAction(state, now, true).step, 10);
   assert.equal(diagnose(state, now).interviews, 0);
-  state.profile.currentRole = ''; assert.equal(searchNextAction(state, now).step, 10);
+  state.profile.currentRole = ''; assert.equal(searchNextAction(state, now).step, 5);
 });
 test('due follow-ups and unrecorded scheduled interviews open the correct tracker', () => {
   const state = ready(); state.jobs = [job('due', { stage: 'applied', appliedAt: '2026-10-01', nextAt: '2026-10-21', nextAction: 'Check the employer timeline' })];

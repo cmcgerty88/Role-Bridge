@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
+
 for (const width of [1280, 390]) {
   test(`interview agent prompt stays local and excludes CV by default at ${width}px`, async ({ page }) => {
     const requests = []; page.on('request', request => requests.push(request));

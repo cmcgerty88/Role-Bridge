@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { expand, tool } from './helpers.mjs';
+
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
 const key = 'rolebridge.encrypted-workspace.v1';
 async function begin(page, goal = 'clarity') {
   await page.goto('/'); await page.locator('#diagnosis-start').click();

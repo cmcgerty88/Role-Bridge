@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { tool } from './helpers.mjs';
+
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
 const home = page => page.locator('.header-links [data-home]');
 async function backAndResume(page, step) {
   await home(page).click();

@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { tool, expand, confirmProfile } from './helpers.mjs';
+
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
 const key = 'rolebridge.encrypted-workspace.v1';
 const item = (id, title, location, description = 'Customer service and Excel reporting with scheduling responsibilities.') => ({ id: `reed-${id}`, title, employer: 'Synthetic employer', location, description, url: `https://www.reed.co.uk/jobs/synthetic/${id}`, expiresAt: '' });
 const sample = () => ({ version: 1, provider: 'reed', status: 'ready', fetchedAt: new Date().toISOString(), partial: false, jobs: [item(1, 'Operations manager', 'Belfast'), item(2, 'Operations manager', 'London'), item(3, 'Software developer', 'Belfast')] });

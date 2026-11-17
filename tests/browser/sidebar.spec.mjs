@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
 const nav = (page, step) => page.locator(`[data-sidebar-step="${step}"]`);
 
 test('desktop left navigation maps to real steps and preserves unsaved inputs', async ({ page }) => {

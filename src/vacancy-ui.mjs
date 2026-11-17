@@ -2,7 +2,7 @@ import { parsePool, rankVacancies } from './vacancy-pool.mjs';
 import { jobSearchLinks, searchRoleOptions } from './job-search-links.mjs';
 const $ = id => document.getElementById(id);
 const node = (tag, value, className) => { const el = document.createElement(tag); if (value !== undefined) el.textContent = value; if (className) el.className = className; return el; };
-export function initVacancies({ getState, updateSearch, addJob, navigate, prepareJob }) {
+export function initVacancies({ getState, updateSearch, addJob, navigate, showOptionalTools = false, prepareJob }) {
   let pool = null, generation = 0, shown = 10, view = 'matched';
   function changeView(next) {
     view = next; shown = 10; render();
@@ -89,13 +89,17 @@ export function initVacancies({ getState, updateSearch, addJob, navigate, prepar
       const message = node('p', '', 'small'); message.setAttribute('role', 'status');
       add.addEventListener('click', () => {
         const result = addJob(job);
-        if (result === true) { add.textContent = 'In my shortlist'; add.disabled = true; message.textContent = 'Added. Choose Prepare for interview to create a pack using this job description and your experience.'; }
+        if (result === true) { add.textContent = 'In my shortlist'; add.disabled = true; message.textContent = showOptionalTools ? 'Added. Choose Prepare for interview to create a pack using this job description and your experience.' : 'Added to your shortlist. Review the job match and full advert before applying.'; }
         else message.textContent = result;
       });
-      const prepare = node('button', 'Prepare for interview', 'primary'); prepare.type = 'button'; prepare.hidden = !exists;
-      prepare.addEventListener('click', () => prepareJob(job.id));
-      add.addEventListener('click', () => { prepare.hidden = !add.disabled; });
-      actions.append(add, prepare); card.append(actions, message); list.append(card);
+      actions.append(add);
+      if (showOptionalTools) {
+        const prepare = node('button', 'Prepare for interview', 'primary'); prepare.type = 'button'; prepare.hidden = !exists;
+        prepare.addEventListener('click', () => prepareJob(job.id));
+        add.addEventListener('click', () => { prepare.hidden = !add.disabled; });
+        actions.append(prepare);
+      }
+      card.append(actions, message); list.append(card);
     }
     $('vacancy-more').hidden = matches.length <= shown;
   }

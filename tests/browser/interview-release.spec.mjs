@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { unzipSync, strFromU8 } from 'fflate';
 import { readFile, writeFile } from 'node:fs/promises';
+
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
 const compact = text => text.replace(/\s/g, '');
 async function download(page, id) { const event = page.waitForEvent('download'); await page.locator('#' + id).click(); return readFile(await (await event).path()); }
 async function prepare(page) {

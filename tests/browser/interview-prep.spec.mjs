@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { tool } from './helpers.mjs';
+
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
 const cv = `PRIVATE_RAW_CV_MARKER private-contact@example.test
 Work Experience
 Release Manager | Private Previous Employer | Jan 2023 - Present

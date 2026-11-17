@@ -15,6 +15,12 @@ import { ROLE_CATALOGUE, exploreRoles, matchRole, roleById, prepareSearchTerms }
 
 const $ = id => document.getElementById(id);
 const node = (tag, text, className) => { const value = document.createElement(tag); if (text !== undefined) value.textContent = text; if (className) value.className = className; return value; };
+// Keep paused tools testable locally without exposing a route on the public site.
+const previewTools = ['127.0.0.1', 'localhost'].includes(location.hostname) && globalThis.__rolebridgePreviewTools === true;
+if (previewTools) {
+  document.querySelectorAll('[data-preview-tool]').forEach(element => { element.hidden = false; });
+  document.querySelector('[data-public-choice]').hidden = true;
+}
 let state = blankState();
 let profileReviewed = false, entryStep = 0;
 let currentStep = 1, fileGeneration = 0, pendingRemoval = null;
@@ -34,7 +40,7 @@ function fillProfile() {
 }
 function updateProfilePrompt() {
   $('profile-prompt').textContent = 'Review your experience';
-  $('profile-continue').textContent = $('goal').value === 'offers' ? 'Prepare for my interview →' : ['interviews', 'applications'].includes($('goal').value) ? 'Choose a job to prepare →' : 'Find suitable jobs →';
+  $('profile-continue').textContent = previewTools && $('goal').value === 'offers' ? 'Prepare for my interview →' : $('goal').value === 'interviews' ? 'Check a job match →' : 'Find suitable jobs →';
   $('profile-context').textContent = 'Check the details from your CV, then choose the role and location you want next. We’ll reuse this profile for each job.';
 }
 function setSaveStatus() { workspace?.changed(); }
@@ -53,6 +59,7 @@ preferencesForm.addEventListener('input', () => { syncProfile(); setSaveStatus()
 $('country').addEventListener('change', () => { $('currency').value = $('country').value === 'IE' ? 'EUR' : 'GBP'; syncProfile(); setSaveStatus(); });
 
 function showStep(step, focus = true) {
+  if (!previewTools && (step === 6 || step === 10)) step = 8;
   if (step !== 10) interviewPrep?.leave();
   if (step !== 6) applicationPack?.clearImport();
   currentStep = step;
@@ -73,6 +80,7 @@ function showStep(step, focus = true) {
   }
 }
 function navigate(step) {
+  if (!previewTools && (step === 6 || step === 10)) step = 8;
   syncProfile();
   const validProfile = [...profileForm.elements].every(input => input.id === 'profile-confirmed' && profileReviewed || input.checkValidity());
   if ([4, 8].includes(step) && !validProfile) { showStep(1); profileForm.reportValidity(); return; }
@@ -86,7 +94,7 @@ $('diagnosis-start').addEventListener('click', event => {
   if (workspaceStarted) { resumeWorkspace(); return; }
   homeRequestedDuringEntry = false; entryStep = 0; workspace.begin();
 });
-$('interview-shortcut').addEventListener('click', () => {
+if (previewTools) $('interview-shortcut').addEventListener('click', () => {
   if (workspaceStarted) { resumeWorkspace(); if (currentStep !== 10) showStep(10); }
   else { entryStep = 10; workspace.begin(); }
 });
@@ -116,7 +124,7 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && $(
 document.querySelector('[data-sidebar-home]').addEventListener('click', () => { closeSidebar(); showHome(); });
 document.querySelectorAll('[data-sidebar-step]').forEach(button => button.addEventListener('click', () => {
   const step = Number(button.dataset.sidebarStep); closeSidebar();
-  if (!workspaceStarted) { homeRequestedDuringEntry = false; pendingSidebarStep = step; entryStep = step === 10 ? 10 : 0; workspace.begin(); return; }
+  if (!workspaceStarted) { homeRequestedDuringEntry = false; pendingSidebarStep = step; entryStep = previewTools && step === 10 ? 10 : 0; workspace.begin(); return; }
   resumeWorkspace(); if (step !== currentStep) navigate(step);
 }));
 function resumeWorkspace() {
@@ -142,10 +150,13 @@ document.querySelectorAll('[data-home]').forEach(link => link.addEventListener('
   if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   event.preventDefault(); showHome();
 }));
-function focusDestination() { return state.profile.goal === 'offers' ? 10 : ['interviews', 'applications'].includes(state.profile.goal) ? 4 : 8; }
+function focusDestination() {
+  if (previewTools) return state.profile.goal === 'offers' ? 10 : ['interviews', 'applications'].includes(state.profile.goal) ? 4 : 8;
+  return state.profile.goal === 'interviews' ? 4 : 8;
+}
 document.querySelectorAll('[data-goal]').forEach(button => button.addEventListener('click', () => {
   $('goal').value = button.dataset.goal; syncProfile(); updateProfilePrompt(); setSaveStatus();
-  if (state.profile.goal === 'offers') showStep(10);
+  if (previewTools && state.profile.goal === 'offers') showStep(10);
   else if (profileReviewed) navigate(focusDestination());
   else showStep(1);
 }));
@@ -443,7 +454,7 @@ function renderResults() {
     if (job.location) meta.append(node('span', job.location));
     if (job.mode !== 'unknown') meta.append(node('span', { remote: 'Remote', hybrid: 'Hybrid', onsite: 'On-site' }[job.mode]));
     card.append(meta);
-    if (job.source?.summaryOnly) card.append(node('p', 'Imported from a Reed summary. Read the full advert and check missing facts before using this for interview preparation. The feed retrieval is not your own check that the vacancy is open.', 'hint'));
+    if (job.source?.summaryOnly) card.append(node('p', 'Imported from a Reed summary. Read the full advert and check missing facts before applying. The feed retrieval is not your own check that the vacancy is open.', 'hint'));
     card.append(node('p', result.failures[0] || result.questions[0] || 'The entered requirements fit, and you confirmed the essentials. This is worth reviewing; it is not a prediction of an interview.', 'job-reason'));
     const details = node('details', undefined, 'job-details'); details.append(node('summary', 'See the reasons and missing information'));
     listSection(details, 'Conflicts with your requirements', result.failures);
@@ -457,8 +468,10 @@ function renderResults() {
     const next = node('p', undefined, 'next-action'); next.append(node('strong', 'Next step'), document.createTextNode(result.nextAction)); details.append(next);
     const actions = node('div', undefined, 'job-actions');
     const continueSearch = node('button', 'See my next step', 'primary'); continueSearch.type = 'button'; continueSearch.addEventListener('click', () => { showStep(5); $('application-list').querySelector(`[data-job-id="${CSS.escape(job.id)}"]`)?.scrollIntoView({ block: 'center' }); }); actions.append(continueSearch);
-    const prepare = node('button', 'Prepare for interview', 'secondary'); prepare.type = 'button'; prepare.addEventListener('click', () => { openInterview(job.id); }); actions.append(prepare);
-    const buildCv = node('button', 'Build a CV for this job', 'secondary'); buildCv.type = 'button'; buildCv.addEventListener('click', () => { showStep(6); applicationPack.render(job.id).catch(() => announce('Could not open the CV builder.')); }); actions.append(buildCv);
+    if (previewTools) {
+      const prepare = node('button', 'Prepare for interview', 'secondary'); prepare.type = 'button'; prepare.addEventListener('click', () => openInterview(job.id)); actions.append(prepare);
+      const buildCv = node('button', 'Build a CV for this job', 'secondary'); buildCv.type = 'button'; buildCv.addEventListener('click', () => { showStep(6); applicationPack.render(job.id).catch(() => announce('Could not open the CV builder.')); }); actions.append(buildCv);
+    }
     if (job.url) { const link = node('a', 'Open original vacancy'); link.href = job.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link); }
     const edit = node('button', 'Edit', 'text-button'); edit.type = 'button'; edit.setAttribute('aria-label', `Edit ${job.title}`); edit.addEventListener('click', () => openJob(job));
     const remove = node('button', 'Remove', 'text-button danger'); remove.type = 'button'; remove.setAttribute('aria-label', `Remove ${job.title}`);
@@ -478,7 +491,7 @@ function renderPlan() {
 }
 $('remove-job-confirm').addEventListener('click', () => { state.jobs = state.jobs.filter(job => job.id !== pendingRemoval); state.packs = state.packs.filter(pack => pack.jobId !== pendingRemoval); pendingRemoval = null; $('remove-job-dialog').close(); renderResults(); announce('Vacancy removed from this tab.'); });
 
-function openInterview(jobId) { showStep(10); interviewPrep.open(jobId); }
+function openInterview(jobId) { if (!previewTools) { navigate(5); return; } showStep(10); interviewPrep.open(jobId); }
 function trackJob(jobId) {
   showStep(5);
   const card = [...$('application-list').children].find(item => item.dataset.jobId === jobId);
@@ -529,7 +542,7 @@ function quickOutcome(job) {
 
 function renderDashboard() {
   syncProfile(); const report = diagnose(state);
-  const next = searchNextAction(state);
+  const next = searchNextAction(state, Date.now(), previewTools);
   $('search-next-title').textContent = next.title; $('search-next-detail').textContent = next.detail;
   $('search-next-action').textContent = next.action;
   $('search-next-action').onclick = () => {
@@ -543,7 +556,8 @@ function renderDashboard() {
   $('upcoming-interviews').hidden = !upcoming.length; $('upcoming-list').replaceChildren();
   for (const job of upcoming) {
     const item = node('div', undefined, 'upcoming-item'); item.append(node('p', `${job.progress.scheduledAt} · ${job.title} — ${job.employer}`));
-    const button = node('button', 'Prepare for this interview', 'secondary'); button.type = 'button'; button.addEventListener('click', () => openInterview(job.id)); item.append(button); $('upcoming-list').append(item);
+    if (previewTools) { const button = node('button', 'Prepare for this interview', 'secondary'); button.type = 'button'; button.addEventListener('click', () => openInterview(job.id)); item.append(button); }
+    $('upcoming-list').append(item);
   }
   $('dashboard-goal').textContent = GOALS[state.profile.goal];
   $('dashboard-expectation').textContent = state.profile.expectedOutcome || 'Add what useful progress would look like in your profile.';
@@ -561,8 +575,9 @@ function renderDashboard() {
     card.append(node('h3', job.title), node('p', job.employer, 'small muted'), node('p', STAGES[p.stage] + (p.appliedAt ? ` · Applied ${p.appliedAt}` : ''), 'small'));
     const actions = node('div', undefined, 'button-row');
     const prepare = node('button', 'Review job match', 'secondary'); prepare.type = 'button'; prepare.addEventListener('click', () => navigate(4));
-    const interview = node('button', 'Prepare for interview', 'secondary'); interview.type = 'button'; interview.addEventListener('click', () => openInterview(job.id));
-    actions.append(prepare, interview); card.append(actions, quickOutcome(job));
+    actions.append(prepare);
+    if (previewTools) { const interview = node('button', 'Prepare for interview', 'secondary'); interview.type = 'button'; interview.addEventListener('click', () => openInterview(job.id)); actions.append(interview); }
+    card.append(actions, quickOutcome(job));
     if (p.scheduledAt) card.append(node('p', `Scheduled interview: ${p.scheduledAt}`, 'small'));
     const form = node('form', undefined, 'tracker-form'); form.autocomplete = 'off'; const fields = node('div', undefined, 'field-grid');
     const add = (name, label, type, value) => {
@@ -621,7 +636,7 @@ workspace = initWorkspace({
     document.querySelector('.hero').hidden = true; $('demo-link').hidden = true;
     const complete = state.profile.currentRole.trim() && state.profile.evidence.trim().length >= 20;
     profileReviewed = Boolean(restored && complete);
-    showStep(entryStep === 10 ? 10 : restored && (complete || state.jobs.length) ? 5 : restored ? 1 : 0); entryStep = 0;
+    showStep(previewTools && entryStep === 10 ? 10 : restored && (complete || state.jobs.length) ? 5 : restored ? 1 : 0); entryStep = 0;
     if (homeRequestedDuringEntry) { homeRequestedDuringEntry = false; showHome(); }
     else if (pendingSidebarStep !== null) { const step = pendingSidebarStep; pendingSidebarStep = null; if (step !== currentStep) navigate(step); }
   }, announce
@@ -630,7 +645,7 @@ interviewPrep = initInterviewPrep({ getState: () => state, changed: setSaveStatu
 applicationPack = initApplicationPack({ getState: () => state, changed: setSaveStatus, announce,
   prepareInterview: openInterview, trackJob, editJob: openJob, getCvSource: () => $('cv-text').value });
 vacancies = initVacancies({
-  getState: () => state, navigate, prepareJob: openInterview,
+  getState: () => state, navigate, showOptionalTools: previewTools, prepareJob: openInterview,
   updateSearch: (target, location) => { $('targetRole').value = target; $('locations').value = location; syncProfile(); setSaveStatus(); },
   addJob: vacancy => {
     if (state.jobs.some(job => job.id === vacancy.id || job.url === vacancy.url)) return 'This vacancy is already in your shortlist.';

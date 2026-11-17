@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { window.__rolebridgePreviewTools = true; }); });
+
 for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 740 }]) {
   test(`saved job goes to one next step, with interview prep optional at ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport); await page.goto('/');
